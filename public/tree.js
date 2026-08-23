@@ -357,6 +357,7 @@
   }
 
   const MINI_BLOSSOM_SVG = `<svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(288)"/><circle cx="0" cy="0" r="2.2" fill="#f59e0b"/></g></svg>`;
+  const MINI_STAR_SVG = `<svg class="mini-star-svg" viewBox="0 0 16 16" width="14" height="14" style="vertical-align:middle;margin:0 2px;"><path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#f59e0b"/></svg>`;
 
   function updateCounter(treeCount, starCount, total) {
     const counter = document.getElementById("counter");
@@ -366,7 +367,7 @@
     } else if (starCount <= 0) {
       counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>bu ağaçta <strong>${total}</strong> dilek çiçek açtı</span>`;
     } else {
-      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span><strong>${treeCount}</strong> çiçek • ✨ <strong>${starCount}</strong> yıldız</span>`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span><strong>${treeCount}</strong> çiçek • ${MINI_STAR_SVG} <strong>${starCount}</strong> yıldız</span>`;
     }
   }
 

@@ -336,8 +336,14 @@ button {
   box-shadow: 0 6px 22px rgba(255, 92, 141, 0.35);
 }
 
-.cta-icon {
-  font-size: 0.95em;
+.sparkle-svg {
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform 0.25s ease;
+}
+
+.cta-btn:hover .sparkle-svg {
+  transform: rotate(45deg) scale(1.2);
 }
 
 /* Stage & Tree */
