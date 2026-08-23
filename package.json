@@ -1,0 +1,23 @@
+{
+  "name": "dilek-agaci",
+  "version": "1.0.0",
+  "description": "Dilek Ağacı — ortak dilek ağacı sitesi (statik önyüz + API tek serviste)",
+  "main": "server/server.js",
+  "author": "dixtuel <asrinklcc@dxtl.com.tr>",
+  "license": "MIT",
+  "homepage": "https://dxtl.com.tr",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
+    "zod": "^4.3.6"
+  }
+}
