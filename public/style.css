@@ -402,17 +402,28 @@ button {
 
 .footer-bar .credit {
   position: static;
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-cursive);
   font-size: 1.35rem;
   line-height: 1;
   color: var(--ink-light);
-  transform: translateY(-1px);
+  transform: translateY(2.5px);
+  text-decoration: none;
+}
+
+.footer-bar .credit:hover {
+  color: var(--sakura-pale);
+  transform: translateY(2.5px) scale(1.05);
 }
 
 .footer-sep {
+  display: inline-flex;
+  align-items: center;
   color: var(--ink-faint);
   opacity: 0.35;
   font-size: 0.8rem;
+  line-height: 1;
   user-select: none;
 }
 
