@@ -160,7 +160,7 @@ button {
 /* Luminous Moon */
 .moon-wrap {
   position: absolute;
-  top: clamp(25px, 6vh, 65px);
+  top: clamp(25px, 6svh, 65px);
   right: clamp(20px, 7vw, 95px);
   width: clamp(65px, 11vw, 95px);
   height: clamp(65px, 11vw, 95px);
@@ -507,7 +507,7 @@ button {
      (ekranın küçük bir kısmını kaplıyordu) — tavan büyütüldü. */
   width: min(1360px, 85vw);
   aspect-ratio: 1050 / 950;
-  max-height: 84vh;
+  max-height: 84svh;
   position: relative;
   z-index: 5;
 }
@@ -1090,15 +1090,22 @@ textarea:focus {
   }
 
   .footer-bar {
-    bottom: 8px;
+    /* Sabit alt konum, sayfa akışındaki counter-pill ("X çiçek açtı")
+       ile aynı satıra denk geliyordu — yukarı taşındı. */
+    bottom: 52px;
     right: 12px;
     padding: 3px 10px;
     gap: 6px;
     background: rgba(78, 68, 95, 0.6);
   }
 
-  .footer-bar .credit {
-    font-size: 1.15rem;
+  /* Mobilde dar ekranda "made by dixtuel" imzası, ortadaki sayaç pill'inin
+     (ör. "X çiçek açtı") üzerine biniyordu. TR/EN anasayfada kalmalı ama
+     imza yalnız dilek formunda (.panel-footer .panel-credit) zaten var —
+     mobilde buradan kaldırılıyor, kaybolmuyor. */
+  .footer-bar .credit,
+  .footer-bar .footer-sep {
+    display: none;
   }
 
   .lang-switch {
@@ -1113,7 +1120,7 @@ textarea:focus {
   .tree-wrap {
     width: min(100%, 96vw);
     aspect-ratio: 1050 / 950;
-    max-height: 70vh;
+    max-height: 70svh;
   }
 
   .ground-terrain {
