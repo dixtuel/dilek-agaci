@@ -17,9 +17,13 @@ olduğu için hangi ücretsiz Node barındırıcısına deploy edersen et veri k
   bu sorunu ortadan kaldırır.
 - **hCaptcha**: form spam/bot koruması. Sitekey herkese açık (HTML'e gömülür), secret sadece
   sunucuda `.env`'de kalır.
-- **NVIDIA NIM (Nemotron)**: Llama Guard'ın Türkçe resmi desteği olmadığı için, Türkçe talimat
-  takibi yapabilen genel amaçlı bir Nemotron modeline moderasyon promptu veriyoruz. Bunun öncesinde
-  ücretsiz bir yerel kara liste (`server/wordlist.js`, kaynak:
+- **NVIDIA NIM (`llama-3.1-nemotron-safety-guard-8b-v3`)**: NVIDIA'nın içerik güvenliği için özel
+  eğittiği, 23 kategorilik bir taksonomi ve yapılandırılmış JSON çıktısı (`User Safety`,
+  `Safety Categories`) ile çalışan bir sınıflandırıcı model. Resmi dil listesinde Türkçe yok
+  (Llama Guard ile aynı durum) ama talimat-takipli bir model olduğu için taksonomiyi sabit tutup
+  dilek metnini Türkçe olarak veriyoruz — canlı testte hem zararsız hem şiddet içeren Türkçe
+  metinleri doğru sınıflandırdı. Bunun öncesinde ücretsiz bir yerel kara liste
+  (`server/wordlist.js`, kaynak:
   [ooguz/turkce-kufur-karaliste](https://github.com/ooguz/turkce-kufur-karaliste), CC BY-SA 4.0)
   hızlı ilk filtre olarak çalışır.
 - **Fail-closed moderasyon**: NIM API'ye ulaşılamazsa dilek reddedilir — düşük trafikli bir site
@@ -46,8 +50,8 @@ yapabilirsin — "Create Database" → "Generate Token".)
 
 ### NVIDIA NIM (içerik moderasyonu) — ücretsiz
 1. [build.nvidia.com](https://build.nvidia.com) üzerinden ücretsiz hesap aç.
-2. Bir modelin (ör. `nvidia/llama-3.1-nemotron-70b-instruct`) sayfasından "Get API Key" ile anahtar
-   üret → `NIM_API_KEY`.
+2. [`nvidia/llama-3.1-nemotron-safety-guard-8b-v3`](https://build.nvidia.com/nvidia/llama-3.1-nemotron-safety-guard-8b-v3)
+   model sayfasından "Get API Key" ile anahtar üret → `NIM_API_KEY`.
 
 ## 2) Ortam değişkenleri
 

@@ -1,19 +1,56 @@
 const { quickFilterReject } = require("./wordlist");
 
 const NIM_API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-const NIM_MODEL = process.env.NIM_MODEL || "nvidia/llama-3.1-nemotron-70b-instruct";
+// Genel amaçlı bir sohbet modeli yerine, NVIDIA'nın bu iş için özel eğittiği
+// içerik güvenliği sınıflandırıcısı kullanılıyor (build.nvidia.com katalog sayfası:
+// nvidia/llama-3.1-nemotron-safety-guard-8b-v3). 9 dili resmi olarak destekliyor
+// (Türkçe bunlardan biri değil), ama talimat + taksonomi + konuşma metnini hedef
+// dilde alacak şekilde tasarlanmış, talimat-takipli bir model; taksonomiyi sabit
+// tutup dilek metnini olduğu gibi (Türkçe) veriyoruz.
+const NIM_MODEL = process.env.NIM_MODEL || "nvidia/llama-3.1-nemotron-safety-guard-8b-v3";
 const NIM_TIMEOUT_MS = Number(process.env.NIM_TIMEOUT_MS || 8000);
 
-const SYSTEM_PROMPT = `Sen bir içerik güvenliği sınıflandırıcısısın. Sana bir "Dilek Ağacı" sitesine
-gönderilmiş Türkçe bir dilek metni verilecek. Görevin bu metnin herkese açık, aile dostu bir
-sitede yayınlanmaya uygun olup olmadığını değerlendirmek.
+// Modelin resmi taksonomisi (build.nvidia.com model kartındaki prompt formatı
+// birebir korunuyor — modelin bu formatla eğitilmiş olması güvenilirliği artırır).
+const TASK_TEMPLATE = (wishText) => `Task: Check if there is unsafe content in the user or agent messages in the below conversation in accordance with our safety policy with the below categories. Provide a 'safe' or 'unsafe' rating for both the user message and the agent response. If there is unsafe content, please also provide a list of violated categories according to our safety policy below.
 
-Şu kategorilerden herhangi biri varsa metni GÜVENSİZ say: nefret söylemi/ayrımcılık, cinsel içerik,
-şiddet veya tehdit, taciz/zorbalık, kendine zarar verme veya intihar teşviki, yasa dışı faaliyet,
-reklam/spam, kişisel veri ifşası (telefon, adres, TC kimlik no vb.).
+<BEGIN UNSAFE CONTENT CATEGORIES>
+S1: Violence.
+S2: Sexual.
+S3: Criminal Planning/Confessions.
+S4: Guns and Illegal Weapons.
+S5: Controlled/Regulated Substances.
+S6: Suicide and Self Harm.
+S7: Sexual (minor).
+S8: Hate/Identity Hate.
+S9: PII/Privacy.
+S10: Harassment.
+S11: Threat.
+S12: Profanity.
+S13: Needs Caution.
+S14: Other.
+S15: Manipulation.
+S16: Fraud/Deception.
+S17: Malware.
+S18: High Risk Gov Decision Making.
+S19: Political/Misinformation/Conspiracy.
+S20: Copyright/Trademark/Plagiarism.
+S21: Unauthorized Advice.
+S22: Illegal Activity.
+S23: Immoral/Unethical.
+<END UNSAFE CONTENT CATEGORIES>
 
-Sadece şu JSON formatında yanıt ver, başka hiçbir metin ekleme:
-{"safe": true veya false, "category": "kısa kategori adı veya none"}`;
+<BEGIN CONVERSATION>
+
+user: ${wishText}
+
+<END CONVERSATION>
+
+Provide your safety assessment for the above conversation in the below output JSON format:
+{"User Safety": safe or unsafe rating for the user message, "Response Safety": safe or unsafe rating for the agent response. Omit if no agent response present. "Safety Categories": a comma-separated list of applicable safety categories from the provided taxonomy. Omit if all safe.}
+
+Do not include anything other than the output JSON in your response.
+Output JSON: `;
 
 function buildTimeoutSignal(ms) {
   const controller = new AbortController();
@@ -38,11 +75,8 @@ async function classifyWithNim(text) {
       body: JSON.stringify({
         model: NIM_MODEL,
         temperature: 0,
-        max_tokens: 60,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: text },
-        ],
+        max_tokens: 100,
+        messages: [{ role: "user", content: TASK_TEMPLATE(text) }],
       }),
       signal,
     });
@@ -58,10 +92,14 @@ async function classifyWithNim(text) {
       throw new Error("NIM yanıtı JSON içermiyor");
     }
     const parsed = JSON.parse(match[0]);
-    if (typeof parsed.safe !== "boolean") {
+    const userSafety = String(parsed["User Safety"] || "").toLowerCase();
+    if (userSafety !== "safe" && userSafety !== "unsafe") {
       throw new Error("NIM yanıtı beklenen alanı içermiyor");
     }
-    return parsed;
+    return {
+      safe: userSafety === "safe",
+      category: parsed["Safety Categories"] || "none",
+    };
   } finally {
     cancel();
   }
