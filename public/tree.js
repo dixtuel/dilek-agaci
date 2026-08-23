@@ -204,6 +204,16 @@
   const renderedBlossoms = new Map();
   const renderedStars = new Map();
 
+  // Çakışma önleme: aynı anchor'a düşen blossom'lar altın-açı (golden-angle)
+  // spiraliyle birbirinden ayrılır (her aynı anchor'a düşüşte yarıçap büyür,
+  // açı 137.5°'lik sabit adımla döner) — rastgele jitter yerine garantili
+  // ayrım sağlar. Gökyüzü yıldızları için de aynı mantıkla, mevcut yıldızlara
+  // olan minimum mesafeyi garanti eden bir spiral arama uygulanır.
+  const GOLDEN_ANGLE_RAD = 137.50776405003785 * (Math.PI / 180);
+  const anchorUsage = new Map(); // anchorIdx -> bu anchor'a kaç blossom düştü
+  const starPositions = []; // { left, top } (yüzde) — yerleşmiş yıldızların merkezleri
+  const MIN_STAR_DIST_PCT = 7; // yüzde cinsinden minimum merkezler-arası mesafe
+
   /**
    * Render roots, branches, and delicate branch leaves up to current reveal depth
    */
@@ -377,8 +387,30 @@
     const star = document.createElement("button");
     star.className = "sky-star";
 
-    const left = (hashId(wish.id) % 88 + 6);
-    const top = (hashId(wish.id + 7) % 35 + 8);
+    let left = (hashId(wish.id) % 88 + 6);
+    let top = (hashId(wish.id + 7) % 35 + 8);
+
+    // Mevcut yıldızlara çok yakınsa, sabit bir spiral izleyerek en yakın
+    // boş noktayı bul — tamamen dolu bir gökyüzünde bile üst üste binmeyi
+    // engelleyip yalnızca sıkışıklığı azaltır (min mesafeyi gevşeterek çıkar).
+    const seedAngle = hashId(wish.id + 31) % 360;
+    let minDist = MIN_STAR_DIST_PCT;
+    for (let pass = 0; pass < 2; pass++) {
+      let placed = false;
+      for (let attempt = 0; attempt < 60; attempt++) {
+        const tooClose = starPositions.some(
+          (p) => Math.hypot(p.left - left, p.top - top) < minDist
+        );
+        if (!tooClose) { placed = true; break; }
+        const angle = (seedAngle + attempt * 61) * (Math.PI / 180);
+        const radius = 2 + attempt * 1.4;
+        left = Math.max(6, Math.min(94, (hashId(wish.id) % 88 + 6) + Math.cos(angle) * radius));
+        top = Math.max(8, Math.min(43, (hashId(wish.id + 7) % 35 + 8) + Math.sin(angle) * radius));
+      }
+      if (placed) break;
+      minDist = minDist / 2; // gökyüzü doluysa asgari mesafeyi gevşet, yine de dağıt
+    }
+    starPositions.push({ left, top });
 
     star.style.left = `${left}%`;
     star.style.top = `${top}%`;
@@ -438,9 +470,16 @@
           const anchorIdx = hashId(wish.id) % anchors.length;
           const anchor = anchors[anchorIdx];
 
-          // Natural organic offset around branch tips
-          const offsetX = (hashId(wish.id + 11) % 28) - 14;
-          const offsetY = (hashId(wish.id + 17) % 28) - 14;
+          // Aynı anchor'a düşen blossom'lar golden-angle spiraliyle ayrılır:
+          // her ek blossom bir öncekinden daha büyük yarıçapta ve 137.5°
+          // döndürülmüş açıda konumlanır — bu da rastgele jitter'ın aksine
+          // çakışmayı garanti şekilde önler, doğal bir çiçek kümesi görünümü verir.
+          const k = anchorUsage.get(anchorIdx) || 0;
+          anchorUsage.set(anchorIdx, k + 1);
+          const spiralAngle = k * GOLDEN_ANGLE_RAD;
+          const spiralRadius = k === 0 ? 0 : Math.min(9 + k * 7, 70);
+          const offsetX = Math.cos(spiralAngle) * spiralRadius;
+          const offsetY = Math.sin(spiralAngle) * spiralRadius;
 
           const hue = HUES[hashId(wish.id + 1) % HUES.length];
           const blossom = makeBlossom(anchor.x + offsetX, anchor.y + offsetY, hue, wish);
@@ -501,6 +540,7 @@
           renderTreeStructure(currentRevealDepth);
           blossomLayer.innerHTML = "";
           renderedBlossoms.clear();
+          anchorUsage.clear();
           renderTreeAndStars(allWishes, false);
         } else {
           renderTreeAndStars(allWishes, !initial);
@@ -871,6 +911,7 @@
         renderTreeStructure(currentRevealDepth);
         blossomLayer.innerHTML = "";
         renderedBlossoms.clear();
+        anchorUsage.clear();
         renderTreeAndStars(allWishes, false);
       } else {
         renderTreeAndStars(allWishes, true);
