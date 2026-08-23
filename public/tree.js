@@ -111,15 +111,36 @@
   }
 
   function anchorsForDepth(revealDepth) {
-    return SEGMENTS.filter((s) => s.depth <= revealDepth && (s.depth === revealDepth || s.isLeaf)).map(
+    // Yalnızca en yeni büyüme ucu (depth === revealDepth) değil, o ana kadar
+    // açılmış TÜM dallar aday anchor'dır — bir dilek çiçeği dalın ucunda
+    // olmak zorunda değil, gövdeye yakın bir dalda da açabilir. Bu, anchor
+    // havuzunu büyük ölçüde genişletir (aynı derinlikte de kalabalık
+    // yığılmayı azaltır).
+    return SEGMENTS.filter((s) => s.depth <= revealDepth).map(
       (s) => ({ x: s.x2, y: s.y2, depth: s.depth })
     );
   }
 
+  /**
+   * FNV-1a + Murmur3 finalizer (avalanche mixing). Basit bir polinom hash
+   * (örn. h*31+c) ardışık küçük tam sayı ID'lerde (1,2,3...) neredeyse
+   * ardışık çıktılar üretir — DFS sırasıyla dizilmiş SEGMENTS dizisinde
+   * ardışık index'ler uzamsal olarak da bitişik olduğundan, dilekler
+   * dalın tek bir küçük bölgesinde yığılıyordu. Finalizer karıştırması
+   * küçük girdi farklarını da büyük, öngörülemez çıktı farklarına çevirir.
+   */
   function hashId(id) {
     const s = String(id);
-    let h = 0;
-    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    h ^= h >>> 15;
+    h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13;
+    h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
     return Math.abs(h);
   }
 
@@ -211,6 +232,36 @@
   // olan minimum mesafeyi garanti eden bir spiral arama uygulanır.
   const GOLDEN_ANGLE_RAD = 137.50776405003785 * (Math.PI / 180);
   const anchorUsage = new Map(); // anchorIdx -> bu anchor'a kaç blossom düştü
+  const blossomPositions = []; // { x, y } — yerleşmiş tüm blossom'ların gerçek piksel konumu
+  const MIN_BLOSSOM_DIST = 26; // px (900x1000 viewBox) — bu mesafenin altı görsel olarak çakışma sayılır
+
+  /**
+   * Bir wish için gerçekten boş (yakın komşusu olmayan) bir anchor+spiral
+   * konumu bulur. Yalnız hash'in seçtiği tek anchor'a golden-angle spiraliyle
+   * güvenmek yeterli değil — FARKLI anchor'lara düşen iki dilek de (özellikle
+   * dal ucuna yakın sık dallanmış bölgelerde) birbirine çok yakın çıkabilir.
+   * Bu yüzden gerçek piksel mesafesini kontrol edip gerekirse komşu
+   * anchor'lara kayarız.
+   */
+  function findBlossomSpot(anchors, startIdx) {
+    const maxAttempts = Math.min(anchors.length, 80);
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const idx = (startIdx + attempt) % anchors.length;
+      const anchor = anchors[idx];
+      const k = anchorUsage.get(idx) || 0;
+      const spiralAngle = k * GOLDEN_ANGLE_RAD;
+      const spiralRadius = k === 0 ? 0 : Math.min(9 + k * 7, 70);
+      const x = anchor.x + Math.cos(spiralAngle) * spiralRadius;
+      const y = anchor.y + Math.sin(spiralAngle) * spiralRadius;
+      const tooClose = blossomPositions.some((p) => Math.hypot(p.x - x, p.y - y) < MIN_BLOSSOM_DIST);
+      if (!tooClose || attempt === maxAttempts - 1) {
+        anchorUsage.set(idx, k + 1);
+        return { x, y };
+      }
+    }
+    const anchor = anchors[startIdx];
+    return { x: anchor.x, y: anchor.y };
+  }
   const starPositions = []; // { left, top } (yüzde) — yerleşmiş yıldızların merkezleri
   const MIN_STAR_DIST_PCT = 7; // yüzde cinsinden minimum merkezler-arası mesafe
 
@@ -468,21 +519,11 @@
       treeWishes.forEach((wish) => {
         if (!renderedBlossoms.has(wish.id)) {
           const anchorIdx = hashId(wish.id) % anchors.length;
-          const anchor = anchors[anchorIdx];
-
-          // Aynı anchor'a düşen blossom'lar golden-angle spiraliyle ayrılır:
-          // her ek blossom bir öncekinden daha büyük yarıçapta ve 137.5°
-          // döndürülmüş açıda konumlanır — bu da rastgele jitter'ın aksine
-          // çakışmayı garanti şekilde önler, doğal bir çiçek kümesi görünümü verir.
-          const k = anchorUsage.get(anchorIdx) || 0;
-          anchorUsage.set(anchorIdx, k + 1);
-          const spiralAngle = k * GOLDEN_ANGLE_RAD;
-          const spiralRadius = k === 0 ? 0 : Math.min(9 + k * 7, 70);
-          const offsetX = Math.cos(spiralAngle) * spiralRadius;
-          const offsetY = Math.sin(spiralAngle) * spiralRadius;
+          const pos = findBlossomSpot(anchors, anchorIdx);
+          blossomPositions.push(pos);
 
           const hue = HUES[hashId(wish.id + 1) % HUES.length];
-          const blossom = makeBlossom(anchor.x + offsetX, anchor.y + offsetY, hue, wish);
+          const blossom = makeBlossom(pos.x, pos.y, hue, wish);
 
           if (!animateNew) {
             blossom.style.animation = "none";
@@ -541,6 +582,7 @@
           blossomLayer.innerHTML = "";
           renderedBlossoms.clear();
           anchorUsage.clear();
+          blossomPositions.length = 0;
           renderTreeAndStars(allWishes, false);
         } else {
           renderTreeAndStars(allWishes, !initial);
@@ -912,6 +954,7 @@
         blossomLayer.innerHTML = "";
         renderedBlossoms.clear();
         anchorUsage.clear();
+        blossomPositions.length = 0;
         renderTreeAndStars(allWishes, false);
       } else {
         renderTreeAndStars(allWishes, true);
