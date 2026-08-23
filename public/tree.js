@@ -510,12 +510,24 @@
     // Pick a random branch/blossom node
     const anchor = anchors[Math.floor(Math.random() * anchors.length)];
 
-    const svgRect = svg.getBoundingClientRect();
-    const stageRect = canvas.getBoundingClientRect();
+    let startX = 0;
+    let startY = 0;
 
-    // Map exact branch SVG point into stage/canvas coordinate space
-    const startX = (svgRect.left - stageRect.left) + (anchor.x / VIEW_W) * svgRect.width + (Math.random() * 8 - 4);
-    const startY = (svgRect.top - stageRect.top) + (anchor.y / VIEW_H) * svgRect.height + (Math.random() * 8 - 4);
+    // 100% exact SVG Screen Coordinate Transformation Matrix (accounts for preserveAspectRatio, scaling, letterboxing perfectly!)
+    if (svg.getScreenCTM && svg.createSVGPoint) {
+      const pt = svg.createSVGPoint();
+      pt.x = anchor.x;
+      pt.y = anchor.y;
+      const screenPt = pt.matrixTransform(svg.getScreenCTM());
+      const stageRect = canvas.getBoundingClientRect();
+      startX = screenPt.x - stageRect.left;
+      startY = screenPt.y - stageRect.top;
+    } else {
+      const svgRect = svg.getBoundingClientRect();
+      const stageRect = canvas.getBoundingClientRect();
+      startX = (svgRect.left - stageRect.left) + (anchor.x / VIEW_W) * svgRect.width;
+      startY = (svgRect.top - stageRect.top) + (anchor.y / VIEW_H) * svgRect.height;
+    }
 
     const petal = {
       startX,
