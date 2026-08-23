@@ -1,8 +1,12 @@
 (() => {
   "use strict";
 
-  const VIEW_W = 900;
-  const VIEW_H = 1000;
+  // Referans wish-tree görsellerine göre büyütüldü (2026-08-23): önceki
+  // 900x1000 canvas'ta ağaç yalnızca ~65-70% yüksekliği dolduruyordu, üstte
+  // boş gökyüzü kalıyordu ve gövde/dallar ince kalıyordu. Şimdi tuvalin
+  // ~86-93%'ünü dolduran, daha kalın gövdeli/dallı bir ağaç için ayarlandı.
+  const VIEW_W = 1050;
+  const VIEW_H = 950;
   const MAX_DEPTH = 8;
   const SVG_NS = "http://www.w3.org/2000/svg";
   const SEED = 20260823;
@@ -49,10 +53,10 @@
       roots.push({ x1, y1, x2, y2, cx1: midX, cy1: midY, cx2: midX, cy2: midY, width });
     }
 
-    makeRoot(VIEW_W / 2 - 8, VIEW_H - 25, -0.65, 55, 14);
-    makeRoot(VIEW_W / 2 + 8, VIEW_H - 25, 0.65, 55, 14);
-    makeRoot(VIEW_W / 2 - 4, VIEW_H - 25, -0.3, 35, 9);
-    makeRoot(VIEW_W / 2 + 4, VIEW_H - 25, 0.3, 35, 9);
+    makeRoot(VIEW_W / 2 - 9, VIEW_H - 25, -0.65, 65, 18);
+    makeRoot(VIEW_W / 2 + 9, VIEW_H - 25, 0.65, 65, 18);
+    makeRoot(VIEW_W / 2 - 5, VIEW_H - 25, -0.3, 41, 11);
+    makeRoot(VIEW_W / 2 + 5, VIEW_H - 25, 0.3, 41, 11);
 
     // 2. Majestic Branching Tree
     function branch(x1, y1, angle, length, width, depth) {
@@ -87,13 +91,13 @@
         const t = childCount === 1 ? 0 : i / (childCount - 1) - 0.5;
         const childAngle = angle + t * spread * 2 + (rand() - 0.5) * 0.15;
         const childLength = length * (depth < 3 ? 0.78 + rand() * 0.08 : 0.72 + rand() * 0.1);
-        const childWidth = width * 0.68;
+        const childWidth = width * 0.71;
         branch(x2, y2, childAngle, childLength, childWidth, depth + 1);
       }
     }
 
     // Trunk starts with majestic height and width
-    branch(VIEW_W / 2, VIEW_H - 25, 0, 165, 24, 0);
+    branch(VIEW_W / 2, VIEW_H - 25, 0, 195, 32, 0);
     return { segments, roots };
   }
 

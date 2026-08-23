@@ -504,7 +504,7 @@ button {
 
 .tree-wrap {
   width: min(880px, 95vw);
-  aspect-ratio: 9 / 10;
+  aspect-ratio: 1050 / 950;
   max-height: 78vh;
   position: relative;
   z-index: 5;
@@ -1083,7 +1083,7 @@ textarea:focus {
 
   .tree-wrap {
     width: min(100%, 96vw);
-    aspect-ratio: 9 / 10;
+    aspect-ratio: 1050 / 950;
     max-height: 64vh;
   }
 
