@@ -42,6 +42,7 @@
 
   --danger: #eb8298;
   --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-cursive: "Italianno", cursive, serif;
   --font-body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
@@ -297,14 +298,15 @@ button {
 }
 
 .wordmark {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.2rem, 2.6vw, 1.55rem);
-  letter-spacing: -0.015em;
+  font-family: var(--font-cursive);
+  font-weight: 400;
+  font-size: clamp(2.1rem, 4.4vw, 2.75rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
   background: linear-gradient(135deg, #FFF2F5 25%, #FFD1DC 65%, #FCAEB8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 8px rgba(252, 174, 184, 0.25));
+  filter: drop-shadow(0 2px 8px rgba(252, 174, 184, 0.35));
   display: inline-flex;
   align-items: center;
 }
@@ -312,7 +314,7 @@ button {
 .wordmark-icon {
   display: inline-flex;
   align-items: center;
-  margin-right: 6px;
+  margin-right: 8px;
   vertical-align: middle;
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   -webkit-text-fill-color: initial;
@@ -338,7 +340,6 @@ button {
 }
 
 .wordmark-accent {
-  font-style: italic;
   background: linear-gradient(135deg, #FFD1DC 0%, #FCAEB8 60%, #EB8298 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -851,11 +852,11 @@ textarea:focus {
 .panel-credit {
   display: block;
   margin-top: 10px;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.84rem;
+  font-family: var(--font-cursive);
+  font-size: 1.45rem;
+  font-weight: 400;
   color: var(--ink-faint);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
 
 .panel-credit a {
@@ -872,17 +873,19 @@ textarea:focus {
 .credit {
   position: fixed;
   bottom: 12px;
-  right: 16px;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.82rem;
+  right: 18px;
+  font-family: var(--font-cursive);
+  font-size: 1.45rem;
+  font-weight: 400;
   color: var(--ink-faint);
+  letter-spacing: 0.04em;
   z-index: 15;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .credit:hover {
   color: var(--sakura-pale);
+  transform: scale(1.05);
 }
 
 /* Terms & 404 Pages */
