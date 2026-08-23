@@ -140,13 +140,10 @@
   // --- SVG Tree Layers ---
   const svg = document.getElementById("tree-svg");
   const rootLayer = document.createElementNS(SVG_NS, "g");
-  const foliageLayer = document.createElementNS(SVG_NS, "g");
   const branchLayer = document.createElementNS(SVG_NS, "g");
   const blossomLayer = document.createElementNS(SVG_NS, "g");
 
-  foliageLayer.setAttribute("class", "foliage-cloud");
   svg.appendChild(rootLayer);
-  svg.appendChild(foliageLayer);
   svg.appendChild(branchLayer);
   svg.appendChild(blossomLayer);
 
@@ -160,7 +157,7 @@
   const renderedStars = new Map();
 
   /**
-   * Render roots, foliage canopy, and branches up to current reveal depth
+   * Render roots and branches up to current reveal depth
    */
   function renderTreeStructure(revealDepth) {
     // 1. Render roots
@@ -175,47 +172,7 @@
       rootLayer.appendChild(path);
     });
 
-    // 2. Render organic foliage canopy clusters (behind branches)
-    foliageLayer.innerHTML = "";
-    const activeSegments = SEGMENTS.filter((s) => s.depth >= 2 && s.depth <= revealDepth);
-    activeSegments.forEach((s, idx) => {
-      const g = document.createElementNS(SVG_NS, "g");
-      g.setAttribute("class", "foliage-cluster");
-
-      const midX = (s.x1 + s.x2) / 2 + ((idx * 17) % 18 - 9);
-      const midY = (s.y1 + s.y2) / 2 + ((idx * 23) % 18 - 9);
-
-      // Base soft sakura cluster cloud
-      const cloud = document.createElementNS(SVG_NS, "ellipse");
-      cloud.setAttribute("cx", midX);
-      cloud.setAttribute("cy", midY);
-      const rx = 16 + (s.depth * 2.8) + (idx % 8);
-      const ry = 12 + (s.depth * 2.2) + (idx % 6);
-      cloud.setAttribute("rx", rx);
-      cloud.setAttribute("ry", ry);
-      cloud.setAttribute("fill", idx % 2 === 0 ? "rgba(255, 92, 141, 0.16)" : "rgba(255, 117, 151, 0.22)");
-      g.appendChild(cloud);
-
-      // Accent miniature leaf buds on branch nodes
-      if (s.depth >= 4) {
-        for (let b = 0; b < 2; b++) {
-          const bud = document.createElementNS(SVG_NS, "ellipse");
-          const bx = s.x2 + ((b === 0 ? -5 : 6) + (idx % 5));
-          const by = s.y2 + ((b === 0 ? -4 : 5) - (idx % 4));
-          bud.setAttribute("cx", bx);
-          bud.setAttribute("cy", by);
-          bud.setAttribute("rx", 5.5);
-          bud.setAttribute("ry", 3.2);
-          bud.setAttribute("fill", b === 0 ? "rgba(255, 183, 197, 0.4)" : "rgba(255, 92, 141, 0.35)");
-          bud.setAttribute("transform", `rotate(${b * 45 + idx * 20} ${bx} ${by})`);
-          g.appendChild(bud);
-        }
-      }
-
-      foliageLayer.appendChild(g);
-    });
-
-    // 3. Render branches
+    // 2. Render branches
     branchLayer.innerHTML = "";
     SEGMENTS.filter((s) => s.depth <= revealDepth).forEach((s) => {
       const path = document.createElementNS(SVG_NS, "path");
@@ -444,6 +401,7 @@
         if (nextRevealDepth !== currentRevealDepth) {
           currentRevealDepth = nextRevealDepth;
           renderTreeStructure(currentRevealDepth);
+          initFallingPetals();
           blossomLayer.innerHTML = "";
           renderedBlossoms.clear();
           renderTreeAndStars(allWishes, false);
@@ -464,31 +422,49 @@
   }
 
   /**
-   * Initializes drifting / falling Sakura Petals (inspired by sakura.js & jQuery-Sakura)
+   * Initializes drifting / falling Sakura Petals originating organically from tree branches down to grass
    */
   function initFallingPetals() {
     const container = document.getElementById("falling-petals");
     if (!container) return;
-    const count = 16;
+    container.innerHTML = "";
+
+    const anchors = anchorsForDepth(currentRevealDepth);
+    if (!anchors || anchors.length === 0) return;
+
+    const count = 12;
     for (let i = 0; i < count; i++) {
+      const anchor = anchors[i % anchors.length];
       const petal = document.createElement("div");
       petal.className = "sakura-petal";
-      const size = 9 + Math.random() * 6; // 9px - 15px
+
+      // Relative coordinates inside the tree container (% based on 900x1000 viewBox)
+      const posX = ((anchor.x + ((i * 19) % 30 - 15)) / VIEW_W) * 100;
+      const posY = ((anchor.y + ((i * 23) % 24 - 12)) / VIEW_H) * 100;
+
+      // Distance to grass ground (around y: 920-950 in SVG coordinates)
+      const fallDist = Math.max(180, (940 - anchor.y) * 0.82);
+
+      const size = 9 + (i % 4); // 9px - 12px
       petal.style.width = `${size}px`;
-      petal.style.height = `${size * 0.72}px`;
-      petal.style.left = `${Math.random() * 92 + 4}%`;
+      petal.style.height = `${size * 0.68}px`;
+      petal.style.left = `${posX}%`;
+      petal.style.top = `${posY}%`;
+      petal.style.setProperty("--fall-dist", `${fallDist}px`);
 
-      const fallDuration = 11 + Math.random() * 9; // 11s - 20s
-      const swayDuration = 3.5 + Math.random() * 3; // 3.5s - 6.5s
-      const delay = Math.random() * 14;
+      const fallDuration = 6.5 + ((i * 3.7) % 4.5); // 6.5s - 11s
+      const swayDuration = 2.8 + ((i * 2.1) % 2.4); // 2.8s - 5.2s
+      const delay = (i * 1.4) % 11;                 // Staggered loop delay
 
-      petal.style.animationDuration = `${fallDuration}s, ${swayDuration}s`;
-      petal.style.animationDelay = `${delay}s, ${Math.random() * 2}s`;
+      petal.style.setProperty("--fall-duration", `${fallDuration}s`);
+      petal.style.setProperty("--sway-duration", `${swayDuration}s`);
+      petal.style.animationDelay = `${delay}s, ${delay * 0.35}s`;
+
       container.appendChild(petal);
     }
   }
 
-  // Initial draw: majestic roots, foliage canopy, and starter branches
+  // Initial draw: majestic roots and starter branches
   renderTreeStructure(currentRevealDepth);
   initFallingPetals();
   poll(true);
@@ -593,6 +569,7 @@
       if (nextRevealDepth !== currentRevealDepth) {
         currentRevealDepth = nextRevealDepth;
         renderTreeStructure(currentRevealDepth);
+        initFallingPetals();
         blossomLayer.innerHTML = "";
         renderedBlossoms.clear();
         renderTreeAndStars(allWishes, false);
