@@ -84,7 +84,18 @@
   <!-- Header -->
   <header class="topbar">
     <a class="wordmark" href="/">
-      <span class="wordmark-leaf" aria-hidden="true">🌸</span>
+      <span class="wordmark-icon" aria-hidden="true">
+        <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="22" height="22">
+          <g transform="translate(12,12)">
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#ff5c8d" transform="rotate(0)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#ff7597" transform="rotate(72)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#ff5c8d" transform="rotate(144)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#ff7597" transform="rotate(216)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#ff5c8d" transform="rotate(288)"/>
+            <circle cx="0" cy="0" r="2.8" fill="#f59e0b"/>
+          </g>
+        </svg>
+      </span>
       Dilek <span class="wordmark-accent">Ağacı</span>
     </a>
     <button class="cta-btn" id="open-form">
@@ -113,11 +124,8 @@
     <!-- Organic Grass & Terrain Mound -->
     <div class="ground-terrain">
       <svg viewBox="0 0 1200 140" preserveAspectRatio="none" class="ground-svg" aria-hidden="true">
-        <!-- Back hill layer -->
         <path d="M 0,80 Q 300,20 600,45 T 1200,60 L 1200,140 L 0,140 Z" fill="#141930" opacity="0.6"></path>
-        <!-- Front grass mound layer -->
         <path d="M 0,95 Q 350,35 600,50 T 1200,75 L 1200,140 L 0,140 Z" fill="#0d1124"></path>
-        <!-- Soft sakura petal scatter on ground -->
         <ellipse cx="540" cy="85" rx="5" ry="2.5" fill="#ff5c8d" opacity="0.7" transform="rotate(-15 540 85)"></ellipse>
         <ellipse cx="660" cy="90" rx="4" ry="2" fill="#ff7597" opacity="0.6" transform="rotate(25 660 90)"></ellipse>
         <ellipse cx="480" cy="92" rx="4.5" ry="2.2" fill="#ff5c8d" opacity="0.6" transform="rotate(10 480 92)"></ellipse>
@@ -135,7 +143,19 @@
   <div class="wish-card-backdrop" id="wish-card-backdrop" hidden></div>
   <div class="wish-card-dialog" id="wish-card-dialog" role="dialog" aria-modal="true" hidden>
     <button class="wish-card-close" id="wish-card-close" aria-label="Kapat">✕</button>
-    <div class="wish-card-tag">🌸 Bir Dilek</div>
+    <div class="wish-card-tag">
+      <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="16" height="16">
+        <g transform="translate(12,12)">
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(0)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(72)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(144)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(216)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(288)"/>
+          <circle cx="0" cy="0" r="2.2" fill="#f59e0b"/>
+        </g>
+      </svg>
+      Bir Dilek
+    </div>
     <p class="wish-card-text" id="wish-card-text"></p>
     <div class="wish-card-meta">
       <span class="wish-card-who" id="wish-card-who"></span>

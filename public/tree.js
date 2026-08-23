@@ -356,15 +356,17 @@
     updateCounter(treeWishes.length, starWishes.length, wishes.length);
   }
 
+  const MINI_BLOSSOM_SVG = `<svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(288)"/><circle cx="0" cy="0" r="2.2" fill="#f59e0b"/></g></svg>`;
+
   function updateCounter(treeCount, starCount, total) {
     const counter = document.getElementById("counter");
     if (!counter) return;
     if (total <= 0) {
-      counter.textContent = "ağaç henüz sessiz, ilk dileği sen bırak";
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} ağaç henüz sessiz, ilk dileği sen bırak`;
     } else if (starCount <= 0) {
-      counter.textContent = `🌸 bu ağaçta ${total} dilek çiçek açtı`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} bu ağaçta <strong>${total}</strong> dilek çiçek açtı`;
     } else {
-      counter.textContent = `🌸 ${treeCount} çiçek • ✨ ${starCount} yıldız`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <strong>${treeCount}</strong> çiçek • ✨ <strong>${starCount}</strong> yıldız`;
     }
   }
 

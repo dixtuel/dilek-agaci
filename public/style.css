@@ -280,10 +280,31 @@ button {
   letter-spacing: -0.01em;
 }
 
-.wordmark-leaf {
-  display: inline-block;
+.wordmark-icon {
+  display: inline-flex;
+  align-items: center;
   margin-right: 6px;
-  font-size: 1.1em;
+  vertical-align: middle;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.wordmark:hover .wordmark-icon {
+  transform: rotate(20deg) scale(1.2);
+}
+
+.mini-blossom-svg {
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform 0.25s ease;
+  filter: drop-shadow(0 1px 4px rgba(255, 92, 141, 0.45));
+}
+
+.counter-pill .mini-blossom-svg {
+  margin-right: 6px;
+}
+
+.counter-pill:hover .mini-blossom-svg {
+  transform: rotate(30deg) scale(1.2);
 }
 
 .wordmark-accent {
