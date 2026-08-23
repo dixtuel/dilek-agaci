@@ -125,6 +125,20 @@ async function tursoQuery(env, sql, args = []) {
   return { rows, affected_row_count: response.affected_row_count || 0 };
 }
 
+let tableInitialized = false;
+async function ensureTable(env) {
+  if (tableInitialized) return;
+  try {
+    await tursoQuery(
+      env,
+      "CREATE TABLE IF NOT EXISTS wishes (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, text TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')))"
+    );
+    tableInitialized = true;
+  } catch (err) {
+    console.warn("Table init warning:", err.message);
+  }
+}
+
 /**
  * Verify hCaptcha
  */
@@ -267,6 +281,7 @@ export async function onRequestGet(context) {
   const limit = Math.min(Number.parseInt(url.searchParams.get("limit") || "200", 10) || 200, 500);
 
   try {
+    await ensureTable(env);
     const queryResult = await tursoQuery(
       env,
       "SELECT id, name, text, created_at FROM wishes WHERE id > ? ORDER BY id ASC LIMIT ?",
@@ -333,6 +348,7 @@ export async function onRequestPost(context) {
   }
 
   try {
+    await ensureTable(env);
     const compressed = await compressText(text);
     const result = await tursoQuery(
       env,
