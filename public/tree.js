@@ -805,9 +805,16 @@
   // --- Hardware-Accelerated Falling Sakura Petals & Grass Accumulation Engine ---
   const canvas = document.getElementById("petals-canvas");
   const ctx = canvas ? canvas.getContext("2d") : null;
+  const groundSvgEl = document.querySelector(".ground-svg");
 
   let canvasW = 0;
   let canvasH = 0;
+  // Çim çizgisinin canvas'ın ALT KENARINDAN gerçek uzaklığı (px) — sabit bir
+  // değer (ör. 35px) varsaymak yerine .ground-svg'nin gerçek DOM konumundan
+  // ölçülür. Mobilde zeminin altında sayaç pill'i de olduğundan çim çizgisi
+  // canvas'ın alt kenarından çok daha yukarıda kalıyor; sabit varsayım
+  // yaprakların havada asılı kalmasına neden oluyordu.
+  let groundOffsetFromBottom = 35;
 
   function resizePetalCanvas() {
     if (!canvas) return;
@@ -818,6 +825,15 @@
     canvas.width = Math.round(canvasW * dpr);
     canvas.height = Math.round(canvasH * dpr);
     if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (groundSvgEl) {
+      const groundRect = groundSvgEl.getBoundingClientRect();
+      // Çimin görsel üst kenarı (path'lerin başladığı yer) tam SVG kutusunun
+      // üstü değil, biraz aşağısında (path "M 0,80 ..." ~%57 civarı) — bu
+      // yüzden SVG yüksekliğinin ~%45'i kadar bir payla üst kenara yaklaşılır.
+      const grassTopY = groundRect.top + groundRect.height * 0.45;
+      groundOffsetFromBottom = Math.max(10, rect.bottom - grassTopY);
+    }
   }
 
   window.addEventListener("resize", resizePetalCanvas);
@@ -906,12 +922,12 @@
    * Calculates the exact surface Y elevation of the curved grass mound at horizontal position x
    */
   function getGrassSurfaceY(x) {
-    if (!canvasW || !canvasH) return canvasH - 40;
+    if (!canvasW || !canvasH) return canvasH - groundOffsetFromBottom;
     // Normalized x from center (-1 at left edge, 0 at center, +1 at right edge)
     const nx = Math.max(-1, Math.min(1, (x - canvasW / 2) / (canvasW / 2)));
-    // Parabolic mound shape: ~75px above bottom at center, ~35px at edges
+    // Parabolic mound shape: merkeze doğru biraz daha yüksek
     const hillElevation = Math.max(0, 1 - nx * nx) * 38;
-    return canvasH - 35 - hillElevation;
+    return canvasH - groundOffsetFromBottom - hillElevation;
   }
 
   function drawPetalShape(context, x, y, w, h, angle, opacity) {
