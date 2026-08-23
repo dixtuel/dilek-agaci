@@ -802,6 +802,17 @@
   closeBtn.addEventListener("click", closePanel);
   backdrop.addEventListener("click", closePanel);
 
+  // Remember language choice when clicking TR / EN switchers
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const href = btn.getAttribute("href") || "";
+      const isEn = href.includes("/en");
+      try {
+        localStorage.setItem("preferred_lang", isEn ? "en" : "tr");
+      } catch (_) {}
+    });
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (!panel.hidden) closePanel();

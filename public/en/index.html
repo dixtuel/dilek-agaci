@@ -18,16 +18,31 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <!-- Cache validation script -->
+  <!-- Cache validation & Client-side Zero-cost Language Detection -->
   <script>
     (function(){
-      var V = "20260823.19";
+      var V = "20260823.20";
       try {
         if (localStorage.getItem("__dilek_v") !== V) {
           localStorage.setItem("__dilek_v", V);
           if (sessionStorage.getItem("__reloaded") !== V) {
             sessionStorage.setItem("__reloaded", V);
             location.reload(true);
+          }
+        }
+      } catch(e){}
+
+      // Automatic Language Detection on first visit
+      try {
+        var savedLang = localStorage.getItem("preferred_lang");
+        if (!savedLang) {
+          var userLang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+          var isTurkic = userLang.startsWith("tr") || userLang.startsWith("az");
+          if (isTurkic) {
+            localStorage.setItem("preferred_lang", "tr");
+            window.location.replace("/");
+          } else {
+            localStorage.setItem("preferred_lang", "en");
           }
         }
       } catch(e){}
@@ -54,7 +69,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Italianno&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css?v=20260823.19" />
+  <link rel="stylesheet" href="/style.css?v=20260823.20" />
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
@@ -246,6 +261,6 @@
   </aside>
 
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-  <script src="/tree.js?v=20260823.19"></script>
+  <script src="/tree.js?v=20260823.20"></script>
 </body>
 </html>
