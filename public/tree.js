@@ -143,11 +143,14 @@
   const branchLayer = document.createElementNS(SVG_NS, "g");
   const leafLayer = document.createElementNS(SVG_NS, "g");
   const blossomLayer = document.createElementNS(SVG_NS, "g");
+  const fallingPetalsLayer = document.createElementNS(SVG_NS, "g");
 
+  fallingPetalsLayer.setAttribute("class", "svg-falling-petals-group");
   svg.appendChild(rootLayer);
   svg.appendChild(branchLayer);
   svg.appendChild(leafLayer);
   svg.appendChild(blossomLayer);
+  svg.appendChild(fallingPetalsLayer);
 
   const skyWishes = document.getElementById("sky-wishes");
 
@@ -454,7 +457,6 @@
         if (nextRevealDepth !== currentRevealDepth) {
           currentRevealDepth = nextRevealDepth;
           renderTreeStructure(currentRevealDepth);
-          initFallingPetals();
           blossomLayer.innerHTML = "";
           renderedBlossoms.clear();
           renderTreeAndStars(allWishes, false);
@@ -474,53 +476,113 @@
     }
   }
 
-  /**
-   * Initializes drifting / falling Sakura Petals originating organically from tree branches down to grass
-   */
-  function initFallingPetals() {
-    const container = document.getElementById("falling-petals");
-    if (!container) return;
-    container.innerHTML = "";
+  // --- Native SVG Real-Time Sakura Petal Physics Engine ---
+  const activePetals = [];
+  let petalAnimationId = null;
+  let lastSpawnTime = 0;
 
+  function spawnSinglePetal() {
     const anchors = anchorsForDepth(currentRevealDepth);
     if (!anchors || anchors.length === 0) return;
 
-    const count = 12;
-    for (let i = 0; i < count; i++) {
-      const anchor = anchors[i % anchors.length];
-      const petal = document.createElement("div");
-      petal.className = "sakura-petal";
+    // Pick a random branch/blossom node
+    const anchor = anchors[Math.floor(Math.random() * anchors.length)];
 
-      // Relative coordinates inside the tree container (% based on 900x1000 viewBox)
-      const posX = ((anchor.x + ((i * 19) % 30 - 15)) / VIEW_W) * 100;
-      const posY = ((anchor.y + ((i * 23) % 24 - 12)) / VIEW_H) * 100;
+    const path = document.createElementNS(SVG_NS, "path");
+    // Organic curved sakura petal path centered at (0, 0)
+    path.setAttribute("d", "M 0,0 C -4.5,-2.5 -6.5,-8 0,-12 C 6.5,-8 4.5,-2.5 0,0 Z");
+    path.setAttribute("class", "svg-falling-petal");
+    fallingPetalsLayer.appendChild(path);
 
-      // Distance to grass ground (y: 950 in SVG is ~95% of container height)
-      const fallDistPercent = Math.max(20, (950 - anchor.y) / VIEW_H * 100);
+    const startX = anchor.x + (Math.random() * 16 - 8);
+    const startY = anchor.y + (Math.random() * 12 - 6);
 
-      const size = 9 + (i % 4); // 9px - 12px
-      petal.style.width = `${size}px`;
-      petal.style.height = `${size * 0.68}px`;
-      petal.style.left = `${posX}%`;
-      petal.style.top = `${posY}%`;
-      petal.style.setProperty("--fall-dist", `${fallDistPercent}%`);
+    const petal = {
+      el: path,
+      startX,
+      x: startX,
+      y: startY,
+      vy: 1.15 + Math.random() * 0.75, // downward gravity velocity
+      swayFreq: 0.022 + Math.random() * 0.014,
+      swayAmp: 20 + Math.random() * 16,
+      phase: Math.random() * Math.PI * 2,
+      angle: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 1.8,
+      flip: Math.random() * Math.PI,
+      flipSpeed: 0.028 + Math.random() * 0.02,
+      scale: 0.85 + Math.random() * 0.35,
+      opacity: 0,
+      t: 0,
+      groundY: 935 + Math.random() * 25,
+      landed: false,
+    };
 
-      const fallDuration = 6.5 + ((i * 3.7) % 4.5); // 6.5s - 11s
-      const delay = (i * 1.4) % 11;                 // Staggered loop delay
+    activePetals.push(petal);
+  }
 
-      petal.style.setProperty("--fall-duration", `${fallDuration}s`);
-      petal.style.animationDelay = `${delay}s`;
+  function updatePetalsPhysics() {
+    const now = Date.now();
+    // Spawn a fresh petal every ~2 seconds if under limit (max 5-6 active)
+    if (now - lastSpawnTime > 1900 && activePetals.length < 6 && !document.hidden) {
+      spawnSinglePetal();
+      lastSpawnTime = now;
+    }
 
-      container.appendChild(petal);
+    for (let i = activePetals.length - 1; i >= 0; i--) {
+      const p = activePetals[i];
+      p.t++;
+
+      // Gentle spawn fade-in during first 15 frames
+      if (p.t < 16) {
+        p.opacity = (p.t / 16) * 0.9;
+      }
+
+      if (!p.landed) {
+        p.y += p.vy;
+        p.x = p.startX + Math.sin(p.t * p.swayFreq + p.phase) * p.swayAmp;
+        p.angle += p.rotSpeed;
+        p.flip += p.flipSpeed;
+
+        // Check if petal reached the grass mound
+        if (p.y >= p.groundY) {
+          p.landed = true;
+          p.y = p.groundY;
+        }
+      } else {
+        // Landing on grass: gently fade out
+        p.opacity -= 0.025;
+        if (p.opacity <= 0) {
+          p.el.remove();
+          activePetals.splice(i, 1);
+          continue;
+        }
+      }
+
+      const scaleX = p.scale * (0.4 + Math.abs(Math.cos(p.flip)) * 0.6);
+      p.el.setAttribute(
+        "transform",
+        `translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)}) rotate(${p.angle.toFixed(1)}) scale(${scaleX.toFixed(2)}, ${p.scale.toFixed(2)})`
+      );
+      p.el.setAttribute("opacity", p.opacity.toFixed(2));
+    }
+
+    if (!document.hidden) {
+      petalAnimationId = requestAnimationFrame(updatePetalsPhysics);
     }
   }
 
-  // Initial draw: majestic roots and starter branches
+  function startPetalsEngine() {
+    if (petalAnimationId) cancelAnimationFrame(petalAnimationId);
+    lastSpawnTime = Date.now() - 1500;
+    petalAnimationId = requestAnimationFrame(updatePetalsPhysics);
+  }
+
+  // Initial draw: majestic roots, branches, and leaf buds
   renderTreeStructure(currentRevealDepth);
-  initFallingPetals();
+  startPetalsEngine();
   poll(true);
 
-  // CPU & Battery Saver: Pause polling when tab is inactive (Page Visibility API)
+  // CPU & Battery Saver: Pause polling and animation loop when tab is inactive
   let pollInterval = setInterval(() => poll(false), 15000);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
@@ -528,11 +590,16 @@
         clearInterval(pollInterval);
         pollInterval = null;
       }
+      if (petalAnimationId) {
+        cancelAnimationFrame(petalAnimationId);
+        petalAnimationId = null;
+      }
     } else {
       poll(false);
       if (!pollInterval) {
         pollInterval = setInterval(() => poll(false), 15000);
       }
+      startPetalsEngine();
     }
   });
 
@@ -620,7 +687,6 @@
       if (nextRevealDepth !== currentRevealDepth) {
         currentRevealDepth = nextRevealDepth;
         renderTreeStructure(currentRevealDepth);
-        initFallingPetals();
         blossomLayer.innerHTML = "";
         renderedBlossoms.clear();
         renderTreeAndStars(allWishes, false);

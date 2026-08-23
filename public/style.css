@@ -408,53 +408,13 @@ button {
   fill: #ffd4e2;
 }
 
-/* Falling Sakura Petals (Drifting naturally from branch nodes down to grass) */
-.falling-petals {
-  position: absolute;
-  inset: 0;
+/* Native SVG Falling Petals */
+.svg-falling-petal {
+  fill: url(#petal-grad);
   pointer-events: none;
-  z-index: 6;
-  overflow: hidden;
-}
-
-.sakura-petal {
-  position: absolute;
-  background: linear-gradient(135deg, #ff85a1 0%, #ff5c8d 100%);
-  border-radius: 9px 2px 9px 2px;
-  box-shadow: 0 1px 3px rgba(255, 92, 141, 0.4);
-  pointer-events: none;
-  opacity: 0;
+  filter: drop-shadow(0 1px 3px rgba(255, 92, 141, 0.4));
+  transform-origin: center;
   will-change: transform, opacity;
-  animation: petal-drift var(--fall-duration, 7.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
-}
-
-@keyframes petal-drift {
-  0% {
-    opacity: 0;
-    transform: translate(0, 0) rotate(0deg) scale(0.6);
-  }
-  10% {
-    opacity: 0.95;
-    transform: translate(6px, calc(var(--fall-dist, 80%) * 0.05)) rotate(25deg) scale(1);
-  }
-  30% {
-    transform: translate(-14px, calc(var(--fall-dist, 80%) * 0.28)) rotate(-30deg) scale(0.96);
-  }
-  55% {
-    transform: translate(16px, calc(var(--fall-dist, 80%) * 0.55)) rotate(45deg) scale(1);
-  }
-  75% {
-    transform: translate(-10px, calc(var(--fall-dist, 80%) * 0.78)) rotate(-15deg) scale(0.92);
-    opacity: 0.9;
-  }
-  92% {
-    transform: translate(6px, calc(var(--fall-dist, 80%) * 0.95)) rotate(30deg) scale(0.85);
-    opacity: 0.35;
-  }
-  100% {
-    transform: translate(8px, var(--fall-dist, 80%)) rotate(35deg) scale(0.8);
-    opacity: 0;
-  }
 }
 
 /* Blossom: 100% reliable cross-device rendering (Safari, Android, Chrome) */
