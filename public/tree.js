@@ -515,9 +515,6 @@
     const startX = (svgRect.left - stageRect.left) + (anchor.x / VIEW_W) * svgRect.width + (Math.random() * 8 - 4);
     const startY = (svgRect.top - stageRect.top) + (anchor.y / VIEW_H) * svgRect.height + (Math.random() * 8 - 4);
 
-    // Landing position: directly on the surface of the grass terrain mound
-    const groundY = canvasH - 35 - Math.random() * 45;
-
     const petal = {
       startX,
       x: startX,
@@ -530,12 +527,24 @@
       size: 7.5 + Math.random() * 3.5, // 7.5px - 11px
       opacity: 0,
       t: 0,
-      groundY,
+      groundJitter: (Math.random() - 0.5) * 6, // Small natural grass variation (+-3px)
       landAngle: (Math.random() - 0.5) * 1.2,
       fading: false,
     };
 
     activePetals.push(petal);
+  }
+
+  /**
+   * Calculates the exact surface Y elevation of the curved grass mound at horizontal position x
+   */
+  function getGrassSurfaceY(x) {
+    if (!canvasW || !canvasH) return canvasH - 40;
+    // Normalized x from center (-1 at left edge, 0 at center, +1 at right edge)
+    const nx = Math.max(-1, Math.min(1, (x - canvasW / 2) / (canvasW / 2)));
+    // Parabolic mound shape: ~75px above bottom at center, ~35px at edges
+    const hillElevation = Math.max(0, 1 - nx * nx) * 38;
+    return canvasH - 35 - hillElevation;
   }
 
   function drawPetalShape(context, x, y, w, h, angle, opacity) {
@@ -576,7 +585,7 @@
           continue;
         }
       }
-      // Flat leaf resting on grass
+      // Flat leaf resting exactly on curved grass surface
       drawPetalShape(ctx, gp.x, gp.y, gp.size * 0.85, gp.size * 0.45, gp.landAngle, gp.opacity);
     }
 
@@ -597,9 +606,12 @@
       const w = p.size * (0.35 + Math.abs(Math.cos(flip)) * 0.65);
       const h = p.size * 1.25;
 
-      // Check grass landing
-      if (p.y >= p.groundY) {
-        p.y = p.groundY;
+      // Exact grass mound surface height at this petal's horizontal x position
+      const surfaceY = getGrassSurfaceY(p.x) + p.groundJitter;
+
+      // Check landing on exact grass surface
+      if (p.y >= surfaceY) {
+        p.y = surfaceY;
         p.opacity = 0.75;
         groundPetals.push(p);
         activePetals.splice(i, 1);
