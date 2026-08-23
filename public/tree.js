@@ -40,11 +40,18 @@
   /**
    * Builds the majestic organic tree with roots, branches and wide canopy
    */
+  // Gövde/kök başlangıç noktası — .ground-terrain overlay'i (CSS'te negatif
+  // margin ile tree-wrap'in altını kaplar) kökleri gizlemesin diye zeminden
+  // belirgin bir pay bırakır (önceki VIEW_H-25 neredeyse tamamen overlay'in
+  // altında kalıyor, kökler görünmüyordu).
+  const GROUND_Y = VIEW_H - 55;
+
   function buildTree() {
     const segments = [];
     const roots = [];
 
-    // 1. Organic Roots at base
+    // 1. Organic Roots at base — gerçek bir sakura gövdesinin taban çıkıntısı
+    // (root flare) gibi: 2 uzun ana kök + 2 orta + 2 kısa/geniş yüzey kökü.
     function makeRoot(x1, y1, angle, length, width) {
       const x2 = x1 + Math.sin(angle) * length;
       const y2 = y1 + Math.cos(angle) * length;
@@ -53,10 +60,12 @@
       roots.push({ x1, y1, x2, y2, cx1: midX, cy1: midY, cx2: midX, cy2: midY, width });
     }
 
-    makeRoot(VIEW_W / 2 - 9, VIEW_H - 25, -0.65, 65, 18);
-    makeRoot(VIEW_W / 2 + 9, VIEW_H - 25, 0.65, 65, 18);
-    makeRoot(VIEW_W / 2 - 5, VIEW_H - 25, -0.3, 41, 11);
-    makeRoot(VIEW_W / 2 + 5, VIEW_H - 25, 0.3, 41, 11);
+    makeRoot(VIEW_W / 2 - 11, GROUND_Y, -0.68, 82, 24);
+    makeRoot(VIEW_W / 2 + 11, GROUND_Y, 0.68, 82, 24);
+    makeRoot(VIEW_W / 2 - 6, GROUND_Y, -0.32, 52, 15);
+    makeRoot(VIEW_W / 2 + 6, GROUND_Y, 0.32, 52, 15);
+    makeRoot(VIEW_W / 2 - 3, GROUND_Y, -0.12, 30, 10);
+    makeRoot(VIEW_W / 2 + 3, GROUND_Y, 0.12, 30, 10);
 
     // 2. Majestic Branching Tree
     function branch(x1, y1, angle, length, width, depth) {
@@ -91,13 +100,13 @@
         const t = childCount === 1 ? 0 : i / (childCount - 1) - 0.5;
         const childAngle = angle + t * spread * 2 + (rand() - 0.5) * 0.15;
         const childLength = length * (depth < 3 ? 0.78 + rand() * 0.08 : 0.72 + rand() * 0.1);
-        const childWidth = width * 0.71;
+        const childWidth = width * 0.74;
         branch(x2, y2, childAngle, childLength, childWidth, depth + 1);
       }
     }
 
     // Trunk starts with majestic height and width
-    branch(VIEW_W / 2, VIEW_H - 25, 0, 195, 32, 0);
+    branch(VIEW_W / 2, GROUND_Y, 0, 220, 40, 0);
     return { segments, roots };
   }
 
