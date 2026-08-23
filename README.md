@@ -1,70 +1,70 @@
-# 🌸 Dilek Ağacı
+# Dilek Ağacı
 
-[![Canlı Site](https://img.shields.io/badge/Canlı_Site-dilekagaci.dxtl.com.tr-e8785a?style=for-the-badge&logo=cloudflare&logoColor=white)](https://dilekagaci.dxtl.com.tr)
-[![Lisans: MIT](https://img.shields.io/badge/Lisans-MIT-blue.svg?style=for-the-badge)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Cloudflare_Pages_%7C_Node.js-orange?style=for-the-badge)](https://dilekagaci.dxtl.com.tr)
-[![Veritabanı](https://img.shields.io/badge/Veritabanı-Turso_(libSQL)-00E599?style=for-the-badge&logo=sqlite&logoColor=white)](https://turso.tech)
+[![Website](https://img.shields.io/badge/website-dilekagaci.dxtl.com.tr-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://dilekagaci.dxtl.com.tr)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![Runtime](https://img.shields.io/badge/runtime-Cloudflare%20Pages%20%7C%20Node.js-black?style=flat-square)](https://dilekagaci.dxtl.com.tr)
+[![Database](https://img.shields.io/badge/database-Turso%20(libSQL)-00E599?style=flat-square&logo=sqlite&logoColor=white)](https://turso.tech)
 
-Dünyanın dört bir yanından insanların umutlarının buluştuğu, bırakılan her dilekle birlikte yeni çiçeklerin açtığı ve dalların gökyüzüne uzandığı **ortak dijital dilek ağacı**.
+Bırakılan her dilekle birlikte yeni çiçeklerin açtığı ve dalların gökyüzüne uzandığı açık kaynaklı ortak dijital dilek ağacı platformu.
 
-Site hem **Cloudflare Pages / Workers (Edge / Serverless)** mimarisiyle 0 ms Cold Start ile global CDN üzerinden, hem de klasik **Node.js / Express (Docker, VPS, Render)** ortamında tam uyumlu olarak çalışacak şekilde tasarlanmıştır.
-
----
-
-## ✨ Öne Çıkan Özellikler
-
-* **🌳 Dinamik ve Organik Fraktal Ağaç:** Matematiksel kübik Bézier eğrileriyle çizilen, dilek sayısı arttıkça büyüyen ve dallanan canlı SVG ağaç motoru.
-* **🍃 60 FPS Donanım Hızlandırmalı Yaprak Fiziği:** HTML5 Canvas üzerinde çalışan; kanopi dal uçlarından, tomurcuklardan ve çiçeklerden dökülüp çimenin üzerine biriken gerçekçi sakura yaprakları.
-* **🌌 Kozmik Yaşam Döngüsü (Cosmic Lifecycle):** Ağaçta belirli bir çiçek yoğunluğuna ulaşıldığında, en eski dilekler gökyüzüne süzülerek parıldayan birer yıldıza dönüşür.
-* **⚡ Çift Çalışma Modu (Dual Runtime):** 
-  * **Cloudflare Pages + Functions:** Statik sayfalar sınırsız ve ücretsiz Cloudflare CDN'inden sunulurken, API uç noktası global Edge üzerinde anında yanıt verir.
-  * **Node.js + Express:** `server/server.js` üzerinden herhangi bir sunucu veya Docker konteynerinde bağımsız çalışabilir.
-* **🛡️ İki Kademeli Akıllı İçerik Moderasyonu:**
-  * **1. Katman:** Yerel Türkçe kelime filtresi ile anında hızlı eleme.
-  * **2. Katman:** NVIDIA NIM (`llama-3.1-nemotron-safety-guard-8b-v3`) 23 kategorilik yapay zekâ güvenlik modeli.
-  * **Bot Koruması:** hCaptcha entegrasyonu ile otomatik spam engelleme.
-* **💾 Turso libSQL & Şeffaf Sıkıştırma:** Veriler bulut SQLite veritabanında saklanır; Web Streams Deflate / Node.js zlib ile şeffaf olarak sıkıştırılarak minimum ağ ve disk alanı tüketilir.
+Sistem, hem **Cloudflare Pages / Functions (Edge / Serverless)** ortamında 0 ms cold start ile global CDN üzerinden, hem de standart **Node.js / Express (Docker, VPS, Render)** ortamında tam uyumlu olarak çalışacak hibrit bir mimariye sahiptir.
 
 ---
 
-## 🛠️ Mimari ve Teknoloji Yığını
+## Özellikler
+
+- **Dinamik Fraktal Ağaç:** Matematiksel kübik Bézier eğrileriyle oluşturulan, toplam dilek sayısı arttıkça büyüyen ve dallanan SVG kanopi motoru.
+- **Donanım Hızlandırmalı Yaprak Fiziği:** HTML5 Canvas üzerinde çalışan; kanopi dal uçlarından, tomurcuklardan ve çiçek merkezlerinden dökülüp çimen yüzeyine konan 60 FPS sakura taç yaprak simülasyonu.
+- **Kozmik Yaşam Döngüsü (Cosmic Lifecycle):** Ağaç üzerinde belirli bir çiçek sınırına ulaşıldığında en eski dileklerin gökyüzüne süzülerek parıldayan birer yıldıza dönüştüğü dinamik arşiv mekanizması.
+- **Çift Çalışma Modu (Dual Runtime):**
+  - **Cloudflare Pages + Functions:** Statik önyüz sınırsız Cloudflare CDN'den sunulurken, `/api/wishes` rotası Edge Functions üzerinde bağımsız çalışır.
+  - **Node.js + Express:** `server/server.js` üzerinden klasik sunucu veya konteyner ortamında çalıştırılabilir.
+- **İki Katmanlı İçerik Moderasyonu:**
+  - Yerel Türkçe kelime kara listesi ile hızlı ön eleme.
+  - NVIDIA NIM (`llama-3.1-nemotron-safety-guard-8b-v3`) 23 kategorilik içerik güvenliği modeli.
+  - hCaptcha entegrasyonu ile bot ve spam engelleme.
+- **Turso libSQL & Şeffaf Sıkıştırma:** Veriler bulut SQLite altyapısında saklanır; Web Streams Deflate ve zlib ile metinler şeffaf olarak sıkıştırılır.
+
+---
+
+## Mimari ve Teknoloji Yığını
 
 | Katman | Teknoloji / Servis | Açıklama |
 | :--- | :--- | :--- |
-| **Önyüz (Frontend)** | Vanilla JS, HTML5 Canvas, SVG, CSS3 | Sıfır harici kütüphane, saf performans ve 60 FPS akıcılık |
-| **Edge API** | Cloudflare Pages Functions | `functions/api/wishes.js` (0 ms Cold Start, sunucusuz) |
+| **Frontend** | Vanilla JavaScript, HTML5 Canvas, SVG, CSS3 | Harici kütüphane bağımlılığı içermeyen saf önyüz |
+| **Edge API** | Cloudflare Pages Functions | `functions/api/wishes.js` (0 ms Cold Start, Serverless) |
 | **Node.js API** | Express, Helmet, CORS | `server/server.js` (Konteyner ve VPS dağıtımları için) |
-| **Veritabanı** | Turso (libSQL / SQLite) | Kalıcı bulut veritabanı |
-| **Moderasyon** | NVIDIA NIM API & Yerel Filtre | Llama 3.1 Safety Guard tabanlı içerik denetimi |
-| **Bot Koruması** | hCaptcha | İstemci ve sunucu taraflı token doğrulama |
+| **Veritabanı** | Turso (libSQL / SQLite) | Kalıcı bulut SQLite veritabanı |
+| **Moderasyon** | NVIDIA NIM API & Yerel Filtre | Yapay zekâ destekli içerik denetimi |
+| **Bot Koruması** | hCaptcha | İstemci ve sunucu taraflı doğrulama |
 
 ---
 
-## 🚀 Kurulum ve Yerel Geliştirme
+## Kurulum ve Yerel Geliştirme
 
-### 1. Depoyu Klonlayın
+### 1. Depoyu Klonlama
 ```bash
 git clone https://github.com/dixtuel/dilek-agaci.git
 cd dilek-agaci
 ```
 
-### 2. Bağımlılıkları Yükleyin
+### 2. Bağımlılıkları Yükleme
 ```bash
 npm install
 ```
 
-### 3. Ortam Değişkenlerini Tanımlayın
-`.env.example` dosyasını `.env` olarak kopyalayın ve gerekli anahtarları doldurun:
+### 3. Ortam Değişkenlerini Tanımlama
+`.env.example` dosyasını `.env` olarak kopyalayın ve değişkenleri yapılandırın:
 ```bash
 cp .env.example .env
 ```
 
-### 4. Projeyi Başlatın
+### 4. Projeyi Başlatma
 
 #### Seçenek A: Node.js ile Başlatma
 ```bash
 npm start
-# http://localhost:3020 adresinden erişilebilir.
+# http://localhost:3020
 ```
 
 #### Seçenek B: Cloudflare Pages / Wrangler ile Başlatma
@@ -74,36 +74,36 @@ npx wrangler pages dev public
 
 ---
 
-## 🌐 Dağıtım (Deployment)
+## Dağıtım (Deployment)
 
 ### Yöntem 1: Cloudflare Pages (Önerilen)
 
-1. Bu depoyu GitHub hesabınıza push edin.
-2. [Cloudflare Dashboard](https://dash.cloudflare.com) $\rightarrow$ **Workers & Pages** $\rightarrow$ **Create Application** $\rightarrow$ **Pages** $\rightarrow$ **Connect to Git** seçeneğine tıklayın.
-3. Proje ayarlarını yapın:
-   * **Framework Preset:** `None`
-   * **Build output directory:** `public`
-   * **Root directory:** `/`
-4. **Environment Variables** bölümüne aşağıdaki değişkenleri ekleyin:
-   * `CORS_ALLOWED_ORIGINS`
-   * `HCAPTCHA_SITE_KEY`
-   * `HCAPTCHA_SECRET`
-   * `NIM_API_KEY`
-   * `NIM_MODEL`
-   * `TURSO_DATABASE_URL`
-   * `TURSO_AUTH_TOKEN`
+1. Depoyu GitHub hesabınıza push edin.
+2. [Cloudflare Dashboard](https://dash.cloudflare.com) $\rightarrow$ **Workers & Pages** $\rightarrow$ **Create Application** $\rightarrow$ **Pages** $\rightarrow$ **Connect to Git** adımlarını izleyin.
+3. Dağıtım ayarlarını yapılandırın:
+   - **Framework Preset:** `None`
+   - **Build output directory:** `public`
+   - **Root directory:** `/`
+4. **Environment Variables** sekmesinden ilgili ortam değişkenlerini tanımlayın:
+   - `CORS_ALLOWED_ORIGINS`
+   - `HCAPTCHA_SITE_KEY`
+   - `HCAPTCHA_SECRET`
+   - `NIM_API_KEY`
+   - `NIM_MODEL`
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN`
 5. **Save and Deploy** butonuna tıklayın.
 
 ### Yöntem 2: Docker / VPS / Render
 
-Node.js ortamını destekleyen herhangi bir PaaS servisinde (Render, Railway, Fly.io vb.) veya kendi Linux sunucunuzda:
-* **Build Command:** `npm install`
-* **Start Command:** `npm start`
-* **Port:** `3020` (veya sunucunun atadığı `PORT`)
+Node.js ortamını destekleyen herhangi bir PaaS servisinde veya bağımsız Linux sunucusunda:
+- **Build Command:** `npm install`
+- **Start Command:** `npm start`
+- **Port:** `3020` (veya `PORT` ortam değişkeni)
 
 ---
 
-## 🔐 Ortam Değişkenleri Referansı
+## Ortam Değişkenleri
 
 | Değişken | Zorunlu | Açıklama |
 | :--- | :---: | :--- |
@@ -118,7 +118,7 @@ Node.js ortamını destekleyen herhangi bir PaaS servisinde (Render, Railway, Fl
 
 ---
 
-## 📄 Lisans
+## Lisans
 
-Bu proje [MIT Lisansı](LICENSE) altında lisanslanmıştır.  
-Telif Hakkı (c) 2026 **Asrın Kılıç (dixtuel)**.
+Bu proje [MIT Lisansı](LICENSE) altında sunulmaktadır.  
+Copyright (c) 2026 **Asrın Kılıç (dixtuel)**.
