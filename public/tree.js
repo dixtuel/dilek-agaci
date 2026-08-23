@@ -678,29 +678,56 @@
     petalAnimationId = requestAnimationFrame(updatePetalsPhysics);
   }
 
+  // --- Smart & Adaptive Edge Request Optimization ---
+  // Minimizes Cloudflare Worker/Function invocations while keeping real-time responsiveness.
+  let pollTimeoutId = null;
+  let lastUserActivity = Date.now();
+
+  function markUserActive() {
+    lastUserActivity = Date.now();
+  }
+
+  window.addEventListener("pointerdown", markUserActive, { passive: true });
+  window.addEventListener("keydown", markUserActive, { passive: true });
+  window.addEventListener("touchstart", markUserActive, { passive: true });
+
+  function scheduleNextPoll() {
+    if (document.hidden) return;
+    if (pollTimeoutId) clearTimeout(pollTimeoutId);
+
+    // Active user (interacted within 90s): poll every 25s
+    // Idle/passive user (away > 90s): relax polling to 50s
+    const isIdle = Date.now() - lastUserActivity > 90000;
+    const delay = isIdle ? 50000 : 25000;
+
+    pollTimeoutId = setTimeout(async () => {
+      if (!document.hidden) {
+        await poll(false);
+        scheduleNextPoll();
+      }
+    }, delay);
+  }
+
   // Initial draw: majestic roots, branches, and leaf buds
   renderTreeStructure(currentRevealDepth);
   startPetalsEngine();
-  poll(true);
+  poll(true).then(() => scheduleNextPoll());
 
-  // CPU & Battery Saver: Pause polling and animation loop when tab is inactive
-  let pollInterval = setInterval(() => poll(false), 15000);
+  // CPU, Battery & Quota Guard: Pause everything when tab is inactive
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
-      if (pollInterval) {
-        clearInterval(pollInterval);
-        pollInterval = null;
+      if (pollTimeoutId) {
+        clearTimeout(pollTimeoutId);
+        pollTimeoutId = null;
       }
       if (petalAnimationId) {
         cancelAnimationFrame(petalAnimationId);
         petalAnimationId = null;
       }
     } else {
-      poll(false);
-      if (!pollInterval) {
-        pollInterval = setInterval(() => poll(false), 15000);
-      }
+      markUserActive();
       startPetalsEngine();
+      poll(false).then(() => scheduleNextPoll());
     }
   });
 

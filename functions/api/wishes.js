@@ -300,10 +300,15 @@ export async function onRequestGet(context) {
     const countResult = await tursoQuery(env, "SELECT COUNT(*) AS total FROM wishes");
     const total = Number(countResult.rows[0]?.total || 0);
 
+    // Initial page load uses short Edge CDN cache to absorb traffic spikes without consuming Function quotas
+    const cacheHeader = since === 0
+      ? "public, max-age=3, s-maxage=6, stale-while-revalidate=30"
+      : "no-cache, private";
+
     return jsonResponse(
       { wishes, total },
       200,
-      { "Cache-Control": "no-cache, private" }
+      { "Cache-Control": cacheHeader }
     );
   } catch (err) {
     return jsonResponse({ error: "Dilekler yüklenemedi", detail: err.message }, 500);
