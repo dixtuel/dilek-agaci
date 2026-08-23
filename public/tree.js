@@ -395,11 +395,47 @@
       addBarkLenticels(branchLayer, s, s.width, si * 31 + 7);
     });
 
-    // 3. Render delicate organic sakura leaves and blossom buds along branches
-    // Ağaç büyütüldükten sonra önceki yoğunluk çok seyrek/boş kalıyordu —
-    // daha alçak derinliklerden başlayan, segment başına daha fazla ve daha
-    // iyi dağılmış yaprak/tomurcuk ile daha dolgun, gerçek bir sakura
-    // kanopisi görünümü hedeflendi.
+    renderFoliage(revealDepth, lastRenderedTotal);
+  }
+
+  // Büyüme eğrisindeki ara noktalar arasında DÜZ ÇİZGİSEL geçiş yapan bir
+  // yoğunluk eğrisi — yalnızca revealDepth değiştiğinde değil, aynı evre
+  // içinde her yeni dilekte de kanopi görünür şekilde dolgunlaşsın diye
+  // (kullanıcı geri bildirimi: "ilk hali aşırı boş duruyor", bir sonraki
+  // yapısal sıçramaya kadar 20-30 dilek boyunca hiçbir şey değişmiyordu).
+  const FLOWER_DENSITY_CURVE = [
+    { t: 0, v: 3 },
+    { t: 20, v: 7 },
+    { t: 60, v: 11 },
+    { t: 150, v: 15 },
+    { t: 400, v: 21 },
+  ];
+
+  function flowerBaseForTotal(total) {
+    const pts = FLOWER_DENSITY_CURVE;
+    if (total <= pts[0].t) return pts[0].v;
+    for (let i = 1; i < pts.length; i++) {
+      if (total <= pts[i].t) {
+        const a = pts[i - 1], b = pts[i];
+        const f = (total - a.t) / (b.t - a.t);
+        return a.v + (b.v - a.v) * f;
+      }
+    }
+    return pts[pts.length - 1].v;
+  }
+
+  let lastRenderedTotal = 0;
+
+  /**
+   * Dal uçlarındaki gerçek mini-sakura çiçeği kümeleri + ince yaprak/tomurcuk
+   * dokusu. Yapısal dallardan (renderTreeStructure) AYRI tutulur çünkü bu,
+   * yalnızca revealDepth değiştiğinde değil, her yeni dilekte (aynı evre
+   * içinde bile) dilek sayısına göre sürekli/kademeli olarak yoğunlaşması
+   * gereken tek katmandır — ucuz olduğundan her güncellemede yeniden
+   * çizilebilir.
+   */
+  function renderFoliage(revealDepth, total) {
+    lastRenderedTotal = total;
     leafLayer.innerHTML = "";
 
     // 3a. Dal uçlarında GERÇEK küçük sakura çiçeği kümeleri (mini-sakura
@@ -409,19 +445,13 @@
     // AYRI çiçeğin yoğun şekilde üst üste binmesinden kaynaklanır, bulanık
     // blob'lardan değil. Her dal ucuna sıkı, jitter'lı bir "pom-pom" kümesi
     // halinde mini çiçek yerleştirilir.
-    //
-    // Küme başına çiçek sayısı revealDepth'e göre ÖLÇEKLENİR (sabit değil):
-    // genç ağaç (depth4) seyrek/ince, olgun ağaç (depth8=MAX_DEPTH) çok
-    // yoğun/gür görünsün diye — dal sayısındaki artışla (2.3x/kademe)
-    // birleşince kademeler arası doluluk farkı gerçekten belirgin olur.
-    const DEPTH_FLOWER_BASE = { 4: 4, 5: 7, 6: 11, 7: 15, 8: 20 };
-    const flowerBase = DEPTH_FLOWER_BASE[revealDepth] || 10;
+    const flowerBase = flowerBaseForTotal(total);
     const flowerJitterSpan = Math.max(2, Math.round(flowerBase * 0.3));
     const clusterRadius = 9 + flowerBase * 0.4;
 
     const tipSegments = SEGMENTS.filter((s) => s.depth <= revealDepth && (s.depth === revealDepth || s.isLeaf));
     tipSegments.forEach((s, ti) => {
-      const flowerCount = flowerBase + (hashId(ti + 500) % flowerJitterSpan);
+      const flowerCount = Math.round(flowerBase + (hashId(ti + 500) % flowerJitterSpan));
       for (let c = 0; c < flowerCount; c++) {
         const jitterAngle = (hashId(ti * 7 + c + 1) % 360) * (Math.PI / 180);
         // Kümenin merkezine yakın çiçekler daha yoğun (sqrt dağılımı),
@@ -734,6 +764,9 @@
           blossomPositions.length = 0;
           renderTreeAndStars(allWishes, false);
         } else {
+          // Derinlik değişmese bile yaprak/çiçek yoğunluğu her yeni dilekte
+          // güncellensin — aynı evre içinde de görünür bir dolgunlaşma olsun.
+          renderFoliage(currentRevealDepth, total);
           renderTreeAndStars(allWishes, !initial);
         }
 
@@ -1106,6 +1139,7 @@
         blossomPositions.length = 0;
         renderTreeAndStars(allWishes, false);
       } else {
+        renderFoliage(currentRevealDepth, total);
         renderTreeAndStars(allWishes, true);
       }
 
