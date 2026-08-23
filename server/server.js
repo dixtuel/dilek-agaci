@@ -81,19 +81,25 @@ app.use((req, res, next) => {
   next();
 });
 
-// Cache static files efficiently for 512MB RAM & 0.15 CPU hosts
 const publicDir = path.join(__dirname, "..", "public");
 const indexTemplate = fs.readFileSync(path.join(publicDir, "index.html"), "utf8");
-const renderedIndex = indexTemplate.replace(
-  "__HCAPTCHA_SITE_KEY__",
-  process.env.HCAPTCHA_SITE_KEY || ""
-);
+const enIndexTemplate = fs.readFileSync(path.join(publicDir, "en", "index.html"), "utf8");
+const siteKey = process.env.HCAPTCHA_SITE_KEY || "";
+const renderedIndex = indexTemplate.replace("__HCAPTCHA_SITE_KEY__", siteKey);
+const renderedEnIndex = enIndexTemplate.replace("__HCAPTCHA_SITE_KEY__", siteKey);
 
 app.get(["/", "/index.html"], (req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
   res.type("html").send(renderedIndex);
+});
+
+app.get(["/en", "/en/", "/en/index.html"], (req, res) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.type("html").send(renderedEnIndex);
 });
 
 // Static assets: Cache long-term with query param busting, but force HTML to revalidate

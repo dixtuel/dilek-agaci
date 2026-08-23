@@ -123,18 +123,64 @@
     return Math.abs(h);
   }
 
+  const MINI_BLOSSOM_SVG = `<svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(288)"/><circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/></g></svg>`;
+  const MINI_STAR_SVG = `<svg class="mini-star-svg" viewBox="0 0 16 16" width="14" height="14" style="vertical-align:middle;margin:0 2px;"><path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#E8E6F0"/></svg>`;
+
+  const IS_EN = document.documentElement.lang === "en" || window.location.pathname.startsWith("/en");
+
+  const I18N = {
+    tr: {
+      guest: "— Bir Ziyaretçi",
+      emptyTree: "ağaç henüz sessiz, ilk dileği sen bırak",
+      treeOnly: (total) => `bu ağaçta <strong>${total}</strong> dilek çiçek açtı`,
+      treeAndStars: (treeCount, starCount) => `<strong>${treeCount}</strong> çiçek • ${MINI_STAR_SVG} <strong>${starCount}</strong> yıldız`,
+      wishLabel: (name, text) => (name ? `${name}: ${text}` : `Dilek: ${text}`),
+      submitting: "Ağaca asılıyor…",
+      submitBtn: "Ağaca As",
+      errorShort: "Dileğin biraz daha uzun olmalı.",
+      errorCaptcha: "Lütfen doğrulamayı tamamla.",
+      errorGeneric: "Bir şeyler ters gitti, tekrar dene.",
+      errorNetwork: "Bağlantı kurulamadı, tekrar dene.",
+      timeJustNow: "az önce",
+      timeMinutesAgo: (m) => `${m} dk önce`,
+      timeHoursAgo: (h) => `${h} saat önce`,
+      timeYesterday: "dün",
+      timeDaysAgo: (d) => `${d} gün önce`,
+    },
+    en: {
+      guest: "— A Visitor",
+      emptyTree: "the tree is quiet, be the first to leave a wish",
+      treeOnly: (total) => `<strong>${total}</strong> wishes blooming on this tree`,
+      treeAndStars: (treeCount, starCount) => `<strong>${treeCount}</strong> blossoms • ${MINI_STAR_SVG} <strong>${starCount}</strong> stars`,
+      wishLabel: (name, text) => (name ? `${name}: ${text}` : `Wish: ${text}`),
+      submitting: "Hanging on tree…",
+      submitBtn: "Hang on Tree",
+      errorShort: "Your wish should be a little longer.",
+      errorCaptcha: "Please complete the verification.",
+      errorGeneric: "Something went wrong, please try again.",
+      errorNetwork: "Could not connect, please try again.",
+      timeJustNow: "just now",
+      timeMinutesAgo: (m) => `${m}m ago`,
+      timeHoursAgo: (h) => `${h}h ago`,
+      timeYesterday: "yesterday",
+      timeDaysAgo: (d) => `${d}d ago`,
+    }
+  };
+
+  const t = IS_EN ? I18N.en : I18N.tr;
+
   function timeAgo(dateInput) {
     if (!dateInput) return "";
     const diff = Date.now() - new Date(dateInput).getTime();
     if (isNaN(diff)) return "";
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return "az önce";
-    if (mins < 60) return `${mins} dk önce`;
+    if (mins < 1) return t.timeJustNow;
+    if (mins < 60) return t.timeMinutesAgo(mins);
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} saat önce`;
+    if (hours < 24) return t.timeHoursAgo(hours);
     const days = Math.floor(hours / 24);
-    if (days === 1) return "dün";
-    return `${days} gün önce`;
+    if (days === 1) return t.timeYesterday;
+    return t.timeDaysAgo(days);
   }
 
   // --- SVG Tree Layers ---
@@ -249,7 +295,7 @@
   function showWishCard(wish) {
     if (!wish) return;
     wishCardText.textContent = wish.text || "";
-    wishCardWho.textContent = wish.name ? `— ${wish.name}` : "— Bir Ziyaretçi";
+    wishCardWho.textContent = wish.name ? `— ${wish.name}` : t.guest;
     wishCardWhen.textContent = wish.created_at ? timeAgo(wish.created_at) : "";
 
     wishCardDialog.hidden = false;
@@ -273,7 +319,7 @@
     g.setAttribute("transform", `translate(${x}, ${y})`);
     g.setAttribute("tabindex", "0");
     g.setAttribute("role", "button");
-    g.setAttribute("aria-label", wish.name ? `${wish.name}: ${wish.text}` : `Dilek: ${wish.text}`);
+    g.setAttribute("aria-label", t.wishLabel(wish.name, wish.text));
 
     // Large visible scale (26px - 34px diameter)
     const scale = 1.6 + (hashId(wish.id) % 35) / 100;
@@ -343,7 +389,7 @@
 
     const delay = (hashId(wish.id + 21) % 4000) / 1000;
     star.style.animationDelay = `${delay}s`;
-    star.setAttribute("aria-label", wish.name ? `${wish.name}: ${wish.text}` : `Dilek: ${wish.text}`);
+    star.setAttribute("aria-label", t.wishLabel(wish.name, wish.text));
 
     star.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -412,18 +458,15 @@
     updateCounter(treeWishes.length, starWishes.length, wishes.length);
   }
 
-  const MINI_BLOSSOM_SVG = `<svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(288)"/><circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/></g></svg>`;
-  const MINI_STAR_SVG = `<svg class="mini-star-svg" viewBox="0 0 16 16" width="14" height="14" style="vertical-align:middle;margin:0 2px;"><path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#E8E6F0"/></svg>`;
-
   function updateCounter(treeCount, starCount, total) {
     const counter = document.getElementById("counter");
     if (!counter) return;
     if (total <= 0) {
-      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>ağaç henüz sessiz, ilk dileği sen bırak</span>`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>${t.emptyTree}</span>`;
     } else if (starCount <= 0) {
-      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>bu ağaçta <strong>${total}</strong> dilek çiçek açtı</span>`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>${t.treeOnly(total)}</span>`;
     } else {
-      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span><strong>${treeCount}</strong> çiçek • ${MINI_STAR_SVG} <strong>${starCount}</strong> yıldız</span>`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>${t.treeAndStars(treeCount, starCount)}</span>`;
     }
   }
 
@@ -780,18 +823,18 @@
     const hcaptchaToken = String(data.get("h-captcha-response") || "");
 
     if (text.length < 2) {
-      formError.textContent = "Dileğin biraz daha uzun olmalı.";
+      formError.textContent = t.errorShort;
       formError.hidden = false;
       return;
     }
     if (!hcaptchaToken) {
-      formError.textContent = "Lütfen doğrulamayı tamamla.";
+      formError.textContent = t.errorCaptcha;
       formError.hidden = false;
       return;
     }
 
     submitBtn.disabled = true;
-    submitBtn.textContent = "Ağaca asılıyor…";
+    submitBtn.textContent = t.submitting;
 
     try {
       const res = await fetch("/api/wishes", {
@@ -802,7 +845,7 @@
       const payload = await res.json();
 
       if (!res.ok) {
-        formError.textContent = payload.error || "Bir şeyler ters gitti, tekrar dene.";
+        formError.textContent = payload.error || t.errorGeneric;
         formError.hidden = false;
         return;
       }
@@ -826,7 +869,7 @@
       charCount.textContent = "0";
       closePanel();
     } catch (err) {
-      formError.textContent = "Bağlantı kurulamadı, tekrar dene.";
+      formError.textContent = t.errorNetwork;
       formError.hidden = false;
     } finally {
       if (window.hcaptcha) {
@@ -837,7 +880,7 @@
         }
       }
       submitBtn.disabled = false;
-      submitBtn.textContent = "Ağaca As";
+      submitBtn.textContent = t.submitBtn;
     }
   });
 

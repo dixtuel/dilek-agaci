@@ -309,19 +309,21 @@ button {
   filter: drop-shadow(0 2px 8px rgba(252, 174, 184, 0.35));
   display: inline-flex;
   align-items: center;
+  gap: 8px;
 }
 
 .wordmark-icon {
   display: inline-flex;
   align-items: center;
-  margin-right: 8px;
-  vertical-align: middle;
+  justify-content: center;
+  margin-right: 0;
+  transform: translateY(-3.5px);
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   -webkit-text-fill-color: initial;
 }
 
 .wordmark:hover .wordmark-icon {
-  transform: rotate(20deg) scale(1.2);
+  transform: translateY(-3.5px) rotate(20deg) scale(1.2);
 }
 
 .mini-blossom-svg {
@@ -343,6 +345,60 @@ button {
   background: linear-gradient(135deg, #FFD1DC 0%, #FCAEB8 60%, #EB8298 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Topbar Actions & Language Switcher */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1.8vw, 14px);
+}
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35em 0.75em;
+  background: var(--btn-glass);
+  border: 1px solid var(--btn-glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  gap: 3px;
+  box-shadow: 0 4px 16px rgba(45, 40, 65, 0.2);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.lang-switch:hover {
+  border-color: rgba(252, 174, 184, 0.35);
+}
+
+.lang-btn {
+  color: var(--ink-faint);
+  text-decoration: none;
+  padding: 2px 5px;
+  border-radius: 6px;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+  line-height: 1;
+}
+
+.lang-btn:hover {
+  color: var(--ink);
+}
+
+.lang-btn.active {
+  color: var(--sakura-main);
+  text-shadow: 0 0 10px rgba(252, 174, 184, 0.45);
+}
+
+.lang-sep {
+  color: var(--ink-faint);
+  opacity: 0.35;
+  font-size: 0.72rem;
+  user-select: none;
 }
 
 /* Solid Glass Buttons */
@@ -943,6 +999,24 @@ textarea:focus {
 
 /* Mobile Responsive Adjustments */
 @media (max-width: 640px) {
+  .topbar {
+    padding: 10px 14px;
+  }
+
+  .topbar-actions {
+    gap: 8px;
+  }
+
+  .cta-btn {
+    padding: 0.55em 1em;
+    font-size: 0.84rem;
+  }
+
+  .lang-switch {
+    padding: 0.3em 0.6em;
+    font-size: 0.76rem;
+  }
+
   .stage {
     padding-top: 60px;
     justify-content: flex-end;

@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Wish Tree — A Shared Digital Canopy of Hopes</title>
+  <meta name="description" content="Make a wish and watch a cherry blossom bloom. A tranquil, shared digital wish tree where hopes from around the world gather under the starry twilight sky." />
+  <meta name="theme-color" content="#4A4E74" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="robots" content="index, follow" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="canonical" href="https://dilekagaci.dxtl.com.tr/en" />
+  <link rel="alternate" hreflang="tr" href="https://dilekagaci.dxtl.com.tr/" />
+  <link rel="alternate" hreflang="en" href="https://dilekagaci.dxtl.com.tr/en" />
+  <link rel="alternate" hreflang="x-default" href="https://dilekagaci.dxtl.com.tr/" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Cache validation script -->
+  <script>
+    (function(){
+      var V = "20260823.17";
+      try {
+        if (localStorage.getItem("__dilek_v") !== V) {
+          localStorage.setItem("__dilek_v", V);
+          if (sessionStorage.getItem("__reloaded") !== V) {
+            sessionStorage.setItem("__reloaded", V);
+            location.reload(true);
+          }
+        }
+      } catch(e){}
+    })();
+  </script>
+
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://dilekagaci.dxtl.com.tr/en" />
+  <meta property="og:title" content="Wish Tree — A Shared Digital Canopy of Hopes" />
+  <meta property="og:description" content="Make a wish and watch a cherry blossom bloom. A tranquil, shared digital wish tree where hopes from around the world gather under the starry twilight sky." />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:site_name" content="Wish Tree" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Wish Tree — A Shared Digital Canopy of Hopes" />
+  <meta name="twitter:description" content="Make a wish and watch a cherry blossom bloom on the digital wish tree." />
+
+  <!-- Favicon (sakura blossom) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%234A4E74'/%3E%3Cellipse cx='16' cy='10.5' rx='3.4' ry='5' fill='%23FCAEB8' opacity='.88' transform='rotate(0 16 16)'/%3E%3Cellipse cx='21.1' cy='13.8' rx='3.4' ry='5' fill='%23FFD1DC' opacity='.82' transform='rotate(72 16 16)'/%3E%3Cellipse cx='19.2' cy='19.8' rx='3.4' ry='5' fill='%23FCAEB8' opacity='.85' transform='rotate(144 16 16)'/%3E%3Cellipse cx='12.8' cy='19.8' rx='3.4' ry='5' fill='%23FFD1DC' opacity='.82' transform='rotate(216 16 16)'/%3E%3Cellipse cx='10.9' cy='13.8' rx='3.4' ry='5' fill='%23FCAEB8' opacity='.85' transform='rotate(288 16 16)'/%3E%3Ccircle cx='16' cy='16' r='2.4' fill='%23FFF2F5'/%3E%3C/svg%3E" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Italianno&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css?v=20260823.17" />
+
+  <!-- Schema.org Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    "name": "Wish Tree",
+    "alternateName": "Dilek Ağacı",
+    "description": "A tranquil, shared digital wish tree where hopes from around the world gather and blossom under the starry twilight sky.",
+    "url": "https://dilekagaci.dxtl.com.tr/en",
+    "inLanguage": "en",
+    "author": {
+      "@type": "Person",
+      "name": "Asrın Kılıç (dixtuel)",
+      "url": "https://dxtl.com.tr"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Deep starry sky atmosphere -->
+  <div class="sky" aria-hidden="true">
+    <div class="sky-stars"></div>
+    <div class="sky-particles"></div>
+    <div class="sky-moon">
+      <div class="moon-crater c1"></div>
+      <div class="moon-crater c2"></div>
+      <div class="moon-crater c3"></div>
+    </div>
+    <div class="clouds-wrap">
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      <div class="cloud cloud-3"></div>
+    </div>
+    <div class="fireflies" id="fireflies"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="topbar">
+    <a href="/en" class="wordmark" aria-label="Wish Tree Home">
+      <span class="wordmark-icon" aria-hidden="true">
+        <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="22" height="22">
+          <g transform="translate(12,12)">
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(144)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(216)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(288)"/>
+            <circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/>
+          </g>
+        </svg>
+      </span>
+      Wish <span class="wordmark-accent">Tree</span>
+    </a>
+    <div class="topbar-actions">
+      <div class="lang-switch" role="navigation" aria-label="Language selection">
+        <a href="/" class="lang-btn" hreflang="tr" title="Türkçe">TR</a>
+        <span class="lang-sep" aria-hidden="true">/</span>
+        <a href="/en" class="lang-btn active" hreflang="en" title="English">EN</a>
+      </div>
+      <button class="cta-btn" id="open-form" aria-haspopup="dialog" aria-expanded="false">
+        <svg class="sparkle-svg" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+          <path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#FFD1DC"/>
+        </svg>
+        Make a Wish
+      </button>
+    </div>
+  </header>
+
+  <!-- Main stage -->
+  <main class="stage">
+    <!-- Hardware-accelerated 60FPS falling sakura petals canvas covering tree and grass -->
+    <canvas id="petals-canvas" class="petals-canvas" aria-hidden="true"></canvas>
+
+    <div class="tree-wrap">
+      <svg id="tree-svg" viewBox="0 0 900 1000" preserveAspectRatio="xMidYMax meet" aria-label="Digital Wish Tree">
+        <defs>
+          <linearGradient id="bark-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#967A90" />
+            <stop offset="50%" stop-color="#8B7084" />
+            <stop offset="100%" stop-color="#7F6477" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Sky wishes (ascending stars container) -->
+    <div class="sky-wishes" id="sky-wishes" aria-label="Stars in the sky"></div>
+
+    <!-- Counter -->
+    <div class="counter-pill" id="counter" aria-live="polite">
+      <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+        <g transform="translate(12,12)">
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(144)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(216)"/>
+          <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(288)"/>
+          <circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/>
+        </g>
+      </svg>
+      <span>loading tree…</span>
+    </div>
+
+    <!-- Ground silhouette -->
+    <div class="ground-terrain" aria-hidden="true">
+      <svg class="ground-svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
+        <path d="M0,75 C320,30 680,20 1000,45 C1240,65 1380,85 1440,95 L1440,120 L0,120 Z" fill="#8E829B" opacity="0.65" />
+        <path d="M0,90 C360,45 740,35 1100,60 C1280,75 1400,90 1440,105 L1440,120 L0,120 Z" fill="#AEA4B9" />
+      </svg>
+    </div>
+  </main>
+
+  <!-- Desktop Bottom Right Credit -->
+  <div class="credit">
+    <a href="https://dxtl.com.tr" target="_blank" rel="noopener" aria-label="Author portfolio">made by dixtuel</a>
+  </div>
+
+  <!-- Wish Card Modal Dialog -->
+  <div class="wish-card-backdrop" id="wish-card-backdrop" hidden></div>
+  <div class="wish-card-dialog" id="wish-card-dialog" role="dialog" aria-modal="true" aria-labelledby="wish-card-title" hidden>
+    <div class="wish-card-content">
+      <div class="wish-card-header">
+        <span class="wish-card-badge" id="wish-card-title">🌸 A Wish</span>
+        <button type="button" class="wish-card-close" id="wish-card-close" aria-label="Close wish card">✕</button>
+      </div>
+      <p class="wish-card-text" id="wish-card-text"></p>
+      <div class="wish-card-footer">
+        <span class="wish-card-who" id="wish-card-who"></span>
+        <span class="wish-card-when" id="wish-card-when"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel: make a wish form -->
+  <div class="panel-backdrop" id="panel-backdrop" hidden></div>
+  <aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
+    <div class="panel-handle" aria-hidden="true"></div>
+    <div class="panel-header">
+      <h2 id="panel-title">Make a Wish</h2>
+      <button type="button" class="panel-close" id="panel-close" aria-label="Close panel">✕</button>
+    </div>
+
+    <p class="panel-hint">Your wish will bloom as a fresh cherry blossom on the tree. Everyone can read it, so please be kind.</p>
+
+    <form id="wish-form" novalidate>
+      <label for="name">Your Name (optional)</label>
+      <input type="text" id="name" name="name" maxlength="40" placeholder="Anonymous, or your nickname…" autocomplete="off" />
+
+      <label for="text">Your Wish</label>
+      <textarea id="text" name="text" maxlength="220" rows="4" required placeholder="Write what is in your heart…"></textarea>
+      <div class="char-count"><span id="char-count">0</span>/220</div>
+
+      <div class="h-captcha" id="hcaptcha-widget" data-sitekey="ac42bc2c-a2b6-4d1a-8a56-f63e5e663406" data-theme="dark" data-size="normal"></div>
+
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+
+      <button type="submit" class="submit-btn" id="submit-btn">Hang on Tree</button>
+    </form>
+
+    <div class="panel-footer">
+      <p><a href="terms.html">Terms &amp; Privacy</a></p>
+      <span class="panel-credit"><a href="https://dxtl.com.tr" target="_blank" rel="noopener">made by dixtuel</a></span>
+    </div>
+  </aside>
+
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+  <script src="../tree.js?v=20260823.17"></script>
+</body>
+</html>
