@@ -3,6 +3,20 @@
 .env.*
 !.env.example
 
+# Site sahiplik doğrulama dosyaları (Google/Bing/Yandex) — hesaba özel, repoya girmez
+public/google*.html
+public/BingSiteAuth.xml
+public/yandex_*.html
+
+# SEO dosyaları — sunucuda/deploy çıktısında tutulur, repoya girmez
+public/sitemap.xml
+public/robots.txt
+
+# AI asistan kılavuzları — yalnız yerel geliştirme notu, repoya girmez
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+
 # Dependencies
 node_modules/
 
