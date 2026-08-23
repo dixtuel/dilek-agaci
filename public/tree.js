@@ -508,9 +508,15 @@
     // Pick a random branch/blossom node
     const anchor = anchors[Math.floor(Math.random() * anchors.length)];
 
-    // Exact branch coordinates mapped to canvas space
-    const startX = (anchor.x / VIEW_W) * canvasW + (Math.random() * 8 - 4);
-    const startY = (anchor.y / VIEW_H) * canvasH + (Math.random() * 8 - 4);
+    const svgRect = svg.getBoundingClientRect();
+    const stageRect = canvas.getBoundingClientRect();
+
+    // Map exact branch SVG point into stage/canvas coordinate space
+    const startX = (svgRect.left - stageRect.left) + (anchor.x / VIEW_W) * svgRect.width + (Math.random() * 8 - 4);
+    const startY = (svgRect.top - stageRect.top) + (anchor.y / VIEW_H) * svgRect.height + (Math.random() * 8 - 4);
+
+    // Landing position: directly on the surface of the grass terrain mound
+    const groundY = canvasH - 35 - Math.random() * 45;
 
     const petal = {
       startX,
@@ -524,7 +530,7 @@
       size: 7.5 + Math.random() * 3.5, // 7.5px - 11px
       opacity: 0,
       t: 0,
-      groundY: canvasH * (0.93 + Math.random() * 0.04), // Grass landing line
+      groundY,
       landAngle: (Math.random() - 0.5) * 1.2,
       fading: false,
     };
