@@ -233,7 +233,7 @@
   const GOLDEN_ANGLE_RAD = 137.50776405003785 * (Math.PI / 180);
   const anchorUsage = new Map(); // anchorIdx -> bu anchor'a kaç blossom düştü
   const blossomPositions = []; // { x, y } — yerleşmiş tüm blossom'ların gerçek piksel konumu
-  const MIN_BLOSSOM_DIST = 26; // px (900x1000 viewBox) — bu mesafenin altı görsel olarak çakışma sayılır
+  const MIN_BLOSSOM_DIST = 18; // px (900x1000 viewBox) — küçülen çiçek boyutuna orantılı, gerçek sakura dallarındaki gibi sık ama ayrık kümeler
 
   /**
    * Bir wish için gerçekten boş (yakın komşusu olmayan) bir anchor+spiral
@@ -382,13 +382,17 @@
     g.setAttribute("role", "button");
     g.setAttribute("aria-label", t.wishLabel(wish.name, wish.text));
 
-    // Large visible scale (26px - 34px diameter)
-    const scale = 1.6 + (hashId(wish.id) % 35) / 100;
+    // Gerçek sakura dallarındaki gibi küçük, sık kümeler halinde açan çiçekler
+    // (yalnız dal ucunda değil, tüm ağaca yayılan, birbirine daha yakın
+    // durabilen küçük blossomlar) — önceki boyut (26-34px) referans
+    // görsellerdeki yoğun/ince çiçeklenmeye göre fazla büyüktü.
+    const scale = 1.05 + (hashId(wish.id) % 35) / 100;
     const petalColor = HUE_COLORS[hue] || "#ff5c8d";
 
-    // Invisible generous hitbox for easy mobile tapping (42px)
+    // Görünmez, mobilde dokunmayı kolaylaştıran hitbox — küçülen çiçeğe göre
+    // orantılı küçültüldü ama yine de rahat tıklanabilir kalacak kadar geniş.
     const hitbox = document.createElementNS(SVG_NS, "circle");
-    hitbox.setAttribute("r", 21);
+    hitbox.setAttribute("r", 16);
     hitbox.setAttribute("fill", "transparent");
     g.appendChild(hitbox);
 
