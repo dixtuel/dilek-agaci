@@ -387,7 +387,28 @@ button {
   stroke-linejoin: round;
 }
 
-/* Falling Sakura Petals (Dispersing organically from tree branches to ground) */
+/* Delicate Sakura Leaves & Blossom Buds on branches */
+.tree-leaf {
+  fill: #ff7597;
+  opacity: 0.82;
+  transition: opacity 0.3s ease;
+}
+
+.tree-leaf-alt {
+  fill: #ff85a1;
+  opacity: 0.75;
+}
+
+.tree-bud {
+  fill: #ff5c8d;
+  opacity: 0.9;
+}
+
+.tree-bud-core {
+  fill: #ffd4e2;
+}
+
+/* Falling Sakura Petals (Drifting naturally from branch nodes down to grass) */
 .falling-petals {
   position: absolute;
   inset: 0;
@@ -399,49 +420,40 @@ button {
 .sakura-petal {
   position: absolute;
   background: linear-gradient(135deg, #ff85a1 0%, #ff5c8d 100%);
-  border-radius: 11px 2px 11px 2px;
-  box-shadow: 0 1px 4px rgba(255, 92, 141, 0.4);
+  border-radius: 9px 2px 9px 2px;
+  box-shadow: 0 1px 3px rgba(255, 92, 141, 0.4);
   pointer-events: none;
   opacity: 0;
-  transform-origin: center;
-  animation: branch-petal-fall var(--fall-duration, 8s) cubic-bezier(0.3, 0.1, 0.3, 1) infinite,
-             branch-petal-sway var(--sway-duration, 3.5s) ease-in-out infinite alternate;
+  will-change: transform, opacity;
+  animation: petal-drift var(--fall-duration, 7.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
 
-@keyframes branch-petal-fall {
+@keyframes petal-drift {
   0% {
     opacity: 0;
-    transform: translateY(0) scale(0.6);
+    transform: translate(0, 0) rotate(0deg) scale(0.6);
   }
-  12% {
+  10% {
     opacity: 0.95;
-    transform: translateY(20px) scale(1);
+    transform: translate(6px, calc(var(--fall-dist, 80%) * 0.05)) rotate(25deg) scale(1);
   }
-  80% {
-    opacity: 0.85;
+  30% {
+    transform: translate(-14px, calc(var(--fall-dist, 80%) * 0.28)) rotate(-30deg) scale(0.96);
   }
-  96% {
-    opacity: 0.2;
-    transform: translateY(var(--fall-dist, 550px)) scale(0.85);
+  55% {
+    transform: translate(16px, calc(var(--fall-dist, 80%) * 0.55)) rotate(45deg) scale(1);
+  }
+  75% {
+    transform: translate(-10px, calc(var(--fall-dist, 80%) * 0.78)) rotate(-15deg) scale(0.92);
+    opacity: 0.9;
+  }
+  92% {
+    transform: translate(6px, calc(var(--fall-dist, 80%) * 0.95)) rotate(30deg) scale(0.85);
+    opacity: 0.35;
   }
   100% {
+    transform: translate(8px, var(--fall-dist, 80%)) rotate(35deg) scale(0.8);
     opacity: 0;
-    transform: translateY(var(--fall-dist, 550px)) scale(0.8);
-  }
-}
-
-@keyframes branch-petal-sway {
-  0% {
-    margin-left: -18px;
-    rotate: -15deg;
-  }
-  50% {
-    margin-left: 24px;
-    rotate: 140deg;
-  }
-  100% {
-    margin-left: -12px;
-    rotate: 260deg;
   }
 }
 

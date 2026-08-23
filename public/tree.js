@@ -141,10 +141,12 @@
   const svg = document.getElementById("tree-svg");
   const rootLayer = document.createElementNS(SVG_NS, "g");
   const branchLayer = document.createElementNS(SVG_NS, "g");
+  const leafLayer = document.createElementNS(SVG_NS, "g");
   const blossomLayer = document.createElementNS(SVG_NS, "g");
 
   svg.appendChild(rootLayer);
   svg.appendChild(branchLayer);
+  svg.appendChild(leafLayer);
   svg.appendChild(blossomLayer);
 
   const skyWishes = document.getElementById("sky-wishes");
@@ -157,7 +159,7 @@
   const renderedStars = new Map();
 
   /**
-   * Render roots and branches up to current reveal depth
+   * Render roots, branches, and delicate branch leaves up to current reveal depth
    */
   function renderTreeStructure(revealDepth) {
     // 1. Render roots
@@ -182,6 +184,57 @@
       path.setAttribute("class", "branch");
       path.setAttribute("fill", "none");
       branchLayer.appendChild(path);
+    });
+
+    // 3. Render delicate organic sakura leaves and blossom buds along branches
+    leafLayer.innerHTML = "";
+    const activeSegments = SEGMENTS.filter((s) => s.depth >= 3 && s.depth <= revealDepth);
+    activeSegments.forEach((s, idx) => {
+      const angle = Math.atan2(s.y2 - s.y1, s.x2 - s.x1);
+      const angleDeg = (angle * 180) / Math.PI;
+
+      // Mid-branch delicate leaf pair
+      const midX = (s.x1 + s.x2) / 2;
+      const midY = (s.y1 + s.y2) / 2;
+
+      // Leaf 1
+      const leaf1 = document.createElementNS(SVG_NS, "ellipse");
+      leaf1.setAttribute("cx", midX);
+      leaf1.setAttribute("cy", midY);
+      leaf1.setAttribute("rx", 6.5);
+      leaf1.setAttribute("ry", 3.2);
+      leaf1.setAttribute("class", idx % 2 === 0 ? "tree-leaf" : "tree-leaf-alt");
+      leaf1.setAttribute("transform", `rotate(${angleDeg + 35} ${midX} ${midY})`);
+      leafLayer.appendChild(leaf1);
+
+      // Leaf 2 (opposite side)
+      if (s.depth >= 4 && idx % 3 !== 0) {
+        const leaf2 = document.createElementNS(SVG_NS, "ellipse");
+        leaf2.setAttribute("cx", midX);
+        leaf2.setAttribute("cy", midY);
+        leaf2.setAttribute("rx", 5.5);
+        leaf2.setAttribute("ry", 2.8);
+        leaf2.setAttribute("class", "tree-leaf-alt");
+        leaf2.setAttribute("transform", `rotate(${angleDeg - 40} ${midX} ${midY})`);
+        leafLayer.appendChild(leaf2);
+      }
+
+      // Small blossom bud at branch junctions
+      if (s.depth >= 4 && (idx % 2 === 0 || s.isLeaf)) {
+        const bud = document.createElementNS(SVG_NS, "circle");
+        bud.setAttribute("cx", s.x2);
+        bud.setAttribute("cy", s.y2);
+        bud.setAttribute("r", 2.6);
+        bud.setAttribute("class", "tree-bud");
+        leafLayer.appendChild(bud);
+
+        const budCore = document.createElementNS(SVG_NS, "circle");
+        budCore.setAttribute("cx", s.x2);
+        budCore.setAttribute("cy", s.y2);
+        budCore.setAttribute("r", 1.2);
+        budCore.setAttribute("class", "tree-bud-core");
+        leafLayer.appendChild(budCore);
+      }
     });
   }
 
@@ -442,23 +495,21 @@
       const posX = ((anchor.x + ((i * 19) % 30 - 15)) / VIEW_W) * 100;
       const posY = ((anchor.y + ((i * 23) % 24 - 12)) / VIEW_H) * 100;
 
-      // Distance to grass ground (around y: 920-950 in SVG coordinates)
-      const fallDist = Math.max(180, (940 - anchor.y) * 0.82);
+      // Distance to grass ground (y: 950 in SVG is ~95% of container height)
+      const fallDistPercent = Math.max(20, (950 - anchor.y) / VIEW_H * 100);
 
       const size = 9 + (i % 4); // 9px - 12px
       petal.style.width = `${size}px`;
       petal.style.height = `${size * 0.68}px`;
       petal.style.left = `${posX}%`;
       petal.style.top = `${posY}%`;
-      petal.style.setProperty("--fall-dist", `${fallDist}px`);
+      petal.style.setProperty("--fall-dist", `${fallDistPercent}%`);
 
       const fallDuration = 6.5 + ((i * 3.7) % 4.5); // 6.5s - 11s
-      const swayDuration = 2.8 + ((i * 2.1) % 2.4); // 2.8s - 5.2s
       const delay = (i * 1.4) % 11;                 // Staggered loop delay
 
       petal.style.setProperty("--fall-duration", `${fallDuration}s`);
-      petal.style.setProperty("--sway-duration", `${swayDuration}s`);
-      petal.style.animationDelay = `${delay}s, ${delay * 0.35}s`;
+      petal.style.animationDelay = `${delay}s`;
 
       container.appendChild(petal);
     }
