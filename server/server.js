@@ -90,17 +90,23 @@ const renderedIndex = indexTemplate.replace(
 );
 
 app.get(["/", "/index.html"], (req, res) => {
-  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
   res.type("html").send(renderedIndex);
 });
 
-// Aggressive caching for static assets with cache-busting query strings
+// Static assets: Cache long-term with query param busting, but force HTML to revalidate
 app.use(
   express.static(publicDir, {
     index: false,
     maxAge: "1d",
     setHeaders: (res, filePath) => {
-      if (filePath.endsWith(".css") || filePath.endsWith(".js") || filePath.endsWith(".svg")) {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+      } else if (filePath.endsWith(".css") || filePath.endsWith(".js") || filePath.endsWith(".svg")) {
         res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
       }
     },
