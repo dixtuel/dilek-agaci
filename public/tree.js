@@ -4,10 +4,15 @@
   const VIEW_W = 800;
   const VIEW_H = 900;
   const MAX_DEPTH = 7;
+  const SVG_NS = "http://www.w3.org/2000/svg";
   const SEED = 20260823;
-  const HUES = ["rose", "saffron", "periwinkle"];
-  const HUE_COLORS = { rose: "#e8785a", saffron: "#f0b429", periwinkle: "#8c8fe0" };
+  const HUES = ["sakura", "rose", "cream", "amber"];
+  const HUE_COLORS = { sakura: "#ffb7c5", rose: "#ff85a1", cream: "#f7e8d0", amber: "#f6c90e" };
+  const MAX_VISIBLE_BLOSSOMS = 80;
 
+  /**
+   * Mulberry32 PRNG function
+   */
   function mulberry32(seed) {
     let a = seed;
     return function () {
@@ -19,30 +24,53 @@
     };
   }
 
+  const rand = mulberry32(SEED);
+
+  /**
+   * Builds the tree structure with organic Bézier curves
+   */
   function buildTree() {
-    const rand = mulberry32(SEED);
     const segments = [];
 
-    function branch(x, y, angle, length, width, depth) {
-      const x2 = x + Math.sin(angle) * length;
-      const y2 = y - Math.cos(angle) * length;
-      const seg = { x1: x, y1: y, x2, y2, depth, width, isLeaf: depth === MAX_DEPTH };
-      segments.push(seg);
+    function branch(x1, y1, angle, length, width, depth) {
+      const x2 = x1 + Math.sin(angle) * length;
+      const y2 = y1 - Math.cos(angle) * length;
 
-      if (depth === MAX_DEPTH) return;
+      // Bézier control points for natural curves
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+      
+      const perpX = Math.cos(angle);
+      const perpY = Math.sin(angle);
+      const bendStrength = length * 0.2 * (rand() - 0.5);
+      
+      const offX = midX + perpX * bendStrength;
+      const offY = midY + perpY * bendStrength;
 
-      const childCount = depth < 3 ? 2 : rand() > 0.35 ? 2 : 3;
-      const spread = 0.42 + rand() * 0.25;
+      // Interpolated 1/3 and 2/3 of the way
+      const cx1 = x1 + (offX - x1) * 0.33;
+      const cy1 = y1 + (offY - y1) * 0.33;
+      const cx2 = offX + (x2 - offX) * 0.33;
+      const cy2 = offY + (y2 - offY) * 0.33;
+
+      const isLeaf = depth >= MAX_DEPTH;
+      segments.push({ x1, y1, x2, y2, cx1, cy1, cx2, cy2, depth, width, isLeaf });
+
+      if (isLeaf) return;
+
+      const childCount = depth < 2 ? 2 : (rand() > 0.3 ? 2 : 3);
+      const spread = 0.4 + rand() * 0.3;
+      
       for (let i = 0; i < childCount; i++) {
         const t = childCount === 1 ? 0 : i / (childCount - 1) - 0.5;
         const childAngle = angle + t * spread * 2 + (rand() - 0.5) * 0.18;
-        const childLength = length * (0.72 + rand() * 0.1);
-        const childWidth = width * 0.68;
+        const childLength = length * (0.7 + rand() * 0.12);
+        const childWidth = width * 0.65;
         branch(x2, y2, childAngle, childLength, childWidth, depth + 1);
       }
     }
 
-    branch(VIEW_W / 2, VIEW_H - 20, 0, 132, 15, 0);
+    branch(VIEW_W / 2, VIEW_H - 20, 0, 130, 16, 0);
     return segments;
   }
 
@@ -69,84 +97,81 @@
     return Math.abs(h);
   }
 
+  // DOM Elements setup
   const svg = document.getElementById("tree-svg");
-  const branchLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  const blossomLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  const branchLayer = document.createElementNS(SVG_NS, "g");
+  const blossomLayer = document.createElementNS(SVG_NS, "g");
   svg.appendChild(branchLayer);
   svg.appendChild(blossomLayer);
 
-  let currentRevealDepth = 3;
+  const skyWishes = document.getElementById("sky-wishes");
+  const tooltipEl = document.getElementById("wish-tooltip");
 
+  let currentRevealDepth = 3;
+  let allWishes = [];
+  let lastId = 0;
+
+  // Track currently rendered items to avoid unnecessary re-renders
+  const renderedBlossoms = new Map();
+  const renderedStars = new Map();
+
+  /**
+   * Render branches up to the current reveal depth
+   */
   function renderBranches(revealDepth) {
     branchLayer.innerHTML = "";
     SEGMENTS.filter((s) => s.depth <= revealDepth).forEach((s) => {
-      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      line.setAttribute("x1", s.x1);
-      line.setAttribute("y1", s.y1);
-      line.setAttribute("x2", s.x2);
-      line.setAttribute("y2", s.y2);
-      line.setAttribute("stroke-width", Math.max(1.4, s.width));
-      line.setAttribute("class", "branch");
-      branchLayer.appendChild(line);
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", `M ${s.x1},${s.y1} C ${s.cx1},${s.cy1} ${s.cx2},${s.cy2} ${s.x2},${s.y2}`);
+      path.setAttribute("stroke", "url(#bark-grad)");
+      path.setAttribute("stroke-width", Math.max(1.5, s.width));
+      path.setAttribute("class", "branch");
+      path.setAttribute("fill", "none");
+      branchLayer.appendChild(path);
     });
   }
 
-  function makeBlossom(x, y, hue, wish) {
-    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    g.setAttribute("class", "blossom");
-    g.setAttribute("transform", `translate(${x}, ${y})`);
-    g.setAttribute("tabindex", "0");
-    g.setAttribute("role", "button");
-    const label = wish
-      ? `${wish.name ? wish.name + ": " : "bir dilek: "}${wish.text}`
-      : "bir dilek";
-    g.setAttribute("aria-label", label);
-
-    const scale = 0.85 + (hashId(wish ? wish.id : x + y) % 30) / 100;
-    const petalColor = HUE_COLORS[hue];
-
-    for (let i = 0; i < 5; i++) {
-      const petal = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
-      petal.setAttribute("class", "petal");
-      petal.setAttribute("cx", "0");
-      petal.setAttribute("cy", -5.5 * scale);
-      petal.setAttribute("rx", 3.4 * scale);
-      petal.setAttribute("ry", 5.6 * scale);
-      petal.setAttribute("fill", petalColor);
-      petal.setAttribute("opacity", "0.92");
-      petal.setAttribute("transform", `rotate(${i * 72})`);
-      g.appendChild(petal);
-    }
-    const center = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    center.setAttribute("r", 2.4 * scale);
-    center.setAttribute("fill", "#fff4da");
-    g.appendChild(center);
-
-    if (wish) {
-      const showTip = () => tooltip.show(g, wish);
-      g.addEventListener("mouseenter", showTip);
-      g.addEventListener("focus", showTip);
-      g.addEventListener("mouseleave", tooltip.hide);
-      g.addEventListener("blur", tooltip.hide);
-    }
-
-    return g;
+  /**
+   * Helper to format relative time for tooltip
+   */
+  function timeAgo(dateInput) {
+    if (!dateInput) return "";
+    const diff = Date.now() - new Date(dateInput).getTime();
+    if (isNaN(diff)) return "";
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "az önce";
+    if (mins < 60) return `${mins} dk önce`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours} saat önce`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "dün";
+    return `${days} gün önce`;
   }
 
-  const tooltipEl = document.getElementById("wish-tooltip");
   const tooltip = {
     show(node, wish) {
+      const isHtml = node instanceof HTMLElement;
       const rect = node.getBoundingClientRect();
       tooltipEl.innerHTML = "";
+      
       const text = document.createElement("span");
       text.textContent = wish.text;
       tooltipEl.appendChild(text);
+      
       if (wish.name) {
         const who = document.createElement("span");
         who.className = "who";
         who.textContent = `— ${wish.name}`;
         tooltipEl.appendChild(who);
       }
+      
+      if (wish.created_at) {
+        const when = document.createElement("span");
+        when.className = "when";
+        when.textContent = timeAgo(wish.created_at);
+        tooltipEl.appendChild(when);
+      }
+      
       tooltipEl.hidden = false;
       const top = rect.top - tooltipEl.offsetHeight - 12 + window.scrollY;
       const left = Math.min(
@@ -159,29 +184,190 @@
     hide() {
       tooltipEl.hidden = true;
     },
+    toggle(node, wish) {
+      if (tooltipEl.hidden) {
+        this.show(node, wish);
+      } else {
+        this.hide();
+      }
+    }
   };
 
-  let lastId = 0;
-  let renderedAnchorCursor = 0;
+  /**
+   * Makes a blossom SVG group
+   */
+  function makeBlossom(x, y, hue, wish) {
+    const g = document.createElementNS(SVG_NS, "g");
+    g.setAttribute("class", "blossom");
+    g.setAttribute("transform", `translate(${x}, ${y})`);
+    g.setAttribute("tabindex", "0");
+    g.setAttribute("role", "button");
+    const label = wish
+      ? `${wish.name ? wish.name + ": " : "bir dilek: "}${wish.text}`
+      : "bir dilek";
+    g.setAttribute("aria-label", label);
 
-  function placeWish(wish, animate) {
-    const anchors = anchorsForDepth(currentRevealDepth);
-    if (!anchors.length) return;
-    const anchor = anchors[hashId(wish.id) % anchors.length];
-    const hue = HUES[hashId(wish.id + 1) % HUES.length];
-    const blossom = makeBlossom(anchor.x, anchor.y, hue, wish);
-    if (!animate) blossom.style.animation = "none";
-    blossomLayer.appendChild(blossom);
+    const scale = 0.8 + (hashId(wish.id) % 35) / 100;
+    const petalColor = HUE_COLORS[hue];
+
+    g.setAttribute("filter", "url(#blossom-glow)");
+
+    for (let i = 0; i < 5; i++) {
+      const petal = document.createElementNS(SVG_NS, "ellipse");
+      petal.setAttribute("class", "petal");
+      petal.setAttribute("cx", "0");
+      petal.setAttribute("cy", -5.5 * scale);
+      petal.setAttribute("rx", 3.2 * scale);
+      petal.setAttribute("ry", 5.8 * scale);
+      petal.setAttribute("fill", petalColor);
+      petal.setAttribute("opacity", "0.92");
+      petal.setAttribute("transform", `rotate(${i * 72})`);
+      g.appendChild(petal);
+    }
+    
+    const center = document.createElementNS(SVG_NS, "circle");
+    center.setAttribute("r", 2.2 * scale);
+    center.setAttribute("fill", "#fff4da");
+    g.appendChild(center);
+
+    const showTip = () => tooltip.show(g, wish);
+    const toggleTip = (e) => { e.preventDefault(); tooltip.toggle(g, wish); };
+    
+    g.addEventListener("mouseenter", showTip);
+    g.addEventListener("focus", showTip);
+    g.addEventListener("mouseleave", tooltip.hide);
+    g.addEventListener("blur", tooltip.hide);
+    g.addEventListener("click", toggleTip);
+    g.addEventListener("touchstart", toggleTip, { passive: false });
+
+    return g;
   }
 
-  function updateCounter(total) {
+  /**
+   * Creates a star element for the sky
+   */
+  function placeStar(wish) {
+    const star = document.createElement("button");
+    star.className = "sky-star";
+    
+    const left = (hashId(wish.id) % 90 + 5);
+    const top = (hashId(wish.id + 7) % 45 + 5);
+    
+    star.style.left = `${left}%`;
+    star.style.top = `${top}%`;
+    
+    const size = 8 + (hashId(wish.id + 13) % 7);
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    
+    const delay = (hashId(wish.id + 21) % 5000) / 1000;
+    star.style.animationDelay = `${delay}s`;
+    
+    const label = `${wish.name ? wish.name + ": " : "bir dilek: "}${wish.text}`;
+    star.setAttribute("aria-label", label);
+    
+    const showTip = () => tooltip.show(star, wish);
+    const toggleTip = (e) => { e.preventDefault(); tooltip.toggle(star, wish); };
+    
+    star.addEventListener("mouseenter", showTip);
+    star.addEventListener("focus", showTip);
+    star.addEventListener("mouseleave", tooltip.hide);
+    star.addEventListener("blur", tooltip.hide);
+    star.addEventListener("click", toggleTip);
+    star.addEventListener("touchstart", toggleTip, { passive: false });
+    
+    return star;
+  }
+
+  /**
+   * Main lifecycle rendering engine
+   * Splits wishes into tree vs sky and handles transitions
+   */
+  function renderTreeAndStars(wishes, animateNew) {
+    const starCount = Math.max(0, wishes.length - MAX_VISIBLE_BLOSSOMS);
+    const starWishes = wishes.slice(0, starCount);
+    const treeWishes = wishes.slice(starCount);
+    
+    const anchors = anchorsForDepth(currentRevealDepth);
+    
+    // 1. Ascend old blossoms to stars
+    for (const [id, blossom] of renderedBlossoms.entries()) {
+      if (!treeWishes.find(w => w.id === id)) {
+        if (animateNew) {
+          blossom.classList.add("ascending");
+          blossom.addEventListener("animationend", () => blossom.remove());
+        } else {
+          blossom.remove();
+        }
+        renderedBlossoms.delete(id);
+      }
+    }
+    
+    // 2. Place stars in sky
+    starWishes.forEach(wish => {
+      if (!renderedStars.has(wish.id)) {
+        const star = placeStar(wish);
+        skyWishes.appendChild(star);
+        renderedStars.set(wish.id, star);
+      }
+    });
+    
+    // 3. Place new blossoms on tree
+    if (anchors.length > 0) {
+      treeWishes.forEach(wish => {
+        if (!renderedBlossoms.has(wish.id)) {
+          const anchorIdx = hashId(wish.id) % anchors.length;
+          const anchor = anchors[anchorIdx];
+          
+          // Random offset to prevent exact overlap
+          const offsetX = (hashId(wish.id + 11) % 17) - 8;
+          const offsetY = (hashId(wish.id + 17) % 17) - 8;
+          
+          const hue = HUES[hashId(wish.id + 1) % HUES.length];
+          const blossom = makeBlossom(anchor.x + offsetX, anchor.y + offsetY, hue, wish);
+          
+          if (!animateNew) {
+            blossom.style.animation = "none";
+          }
+          
+          blossomLayer.appendChild(blossom);
+          renderedBlossoms.set(wish.id, blossom);
+        }
+      });
+    }
+    
+    updateCounter(treeWishes.length, starWishes.length, wishes.length);
+  }
+
+  /**
+   * Updates the bottom counter
+   */
+  function updateCounter(treeCount, starCount, total) {
     const counter = document.getElementById("counter");
     if (total <= 0) {
       counter.textContent = "ağaç henüz sessiz, ilk dileği sen bırak";
-    } else if (total === 1) {
-      counter.textContent = "bu ağaçta 1 dilek açtı";
+    } else if (starCount <= 0) {
+      counter.textContent = `🌸 bu ağaçta ${total} dilek çiçek açtı`;
     } else {
-      counter.textContent = `bu ağaçta ${total} dilek açtı`;
+      counter.textContent = `🌸 ${treeCount} çiçek • ✨ ${starCount} yıldız`;
+    }
+  }
+
+  /**
+   * Initializes fireflies
+   */
+  function createFireflies() {
+    const container = document.getElementById("fireflies");
+    if (!container) return;
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement("div");
+      el.className = "firefly";
+      el.style.left = (10 + Math.random() * 80) + "%";
+      el.style.top = (35 + Math.random() * 55) + "%";
+      el.style.animationDelay = (Math.random() * 8) + "s";
+      el.style.animationDuration = (15 + Math.random() * 12) + "s, " + (4 + Math.random() * 4) + "s";
+      container.appendChild(el);
     }
   }
 
@@ -194,30 +380,49 @@
   async function poll(initial) {
     try {
       const { wishes, total } = await fetchWishes(initial ? 0 : lastId);
-      const nextRevealDepth = revealDepthForTotal(total);
-      if (nextRevealDepth !== currentRevealDepth) {
-        currentRevealDepth = nextRevealDepth;
-        renderBranches(currentRevealDepth);
-        blossomLayer.innerHTML = "";
-        const { wishes: all } = await fetchWishes(0);
-        all.forEach((w) => placeWish(w, false));
-        lastId = all.length ? all[all.length - 1].id : 0;
-      } else {
-        wishes.forEach((w) => placeWish(w, true));
-        if (wishes.length) lastId = wishes[wishes.length - 1].id;
+      
+      let newWishesFetched = false;
+      
+      if (initial) {
+        allWishes = wishes;
+        newWishesFetched = true;
+      } else if (wishes.length > 0) {
+        allWishes = [...allWishes, ...wishes];
+        newWishesFetched = true;
       }
-      updateCounter(total);
+      
+      if (newWishesFetched) {
+        const nextRevealDepth = revealDepthForTotal(total);
+        if (nextRevealDepth !== currentRevealDepth) {
+          currentRevealDepth = nextRevealDepth;
+          renderBranches(currentRevealDepth);
+          // If tree shape changed significantly, clear blossoms and redraw immediately
+          blossomLayer.innerHTML = "";
+          renderedBlossoms.clear();
+          renderTreeAndStars(allWishes, false);
+        } else {
+          renderTreeAndStars(allWishes, !initial);
+        }
+        
+        if (allWishes.length > 0) {
+          lastId = allWishes[allWishes.length - 1].id;
+        }
+      } else {
+        // Just update counter if total shifted without new items returned
+        updateCounter(Math.min(total, MAX_VISIBLE_BLOSSOMS), Math.max(0, total - MAX_VISIBLE_BLOSSOMS), total);
+      }
     } catch (err) {
-      // sessizce yeniden dene — ağ hatası kullanıcıyı bloklamamalı
       console.warn("Dilek Ağacı: senkronizasyon hatası", err);
     }
   }
 
+  // --- Initial Setup ---
+  createFireflies();
   renderBranches(currentRevealDepth);
   poll(true);
   setInterval(() => poll(false), 15000);
 
-  // --- Panel / form ---
+  // --- Panel / form Handling ---
   const panel = document.getElementById("panel");
   const backdrop = document.getElementById("panel-backdrop");
   const openBtn = document.getElementById("open-form");
@@ -233,6 +438,7 @@
     backdrop.hidden = false;
     textArea.focus();
   }
+  
   function closePanel() {
     panel.hidden = true;
     backdrop.hidden = true;
@@ -247,6 +453,13 @@
 
   textArea.addEventListener("input", () => {
     charCount.textContent = String(textArea.value.length);
+  });
+  
+  // Mobile tap outside tooltip support
+  document.addEventListener("click", (e) => {
+    if (!tooltipEl.hidden && !e.target.closest('.blossom') && !e.target.closest('.sky-star') && !e.target.closest('#wish-tooltip')) {
+      tooltip.hide();
+    }
   });
 
   form.addEventListener("submit", async (e) => {
@@ -286,9 +499,21 @@
         return;
       }
 
-      placeWish(payload.wish, true);
+      // Add to our local state and re-render
+      allWishes.push(payload.wish);
       lastId = Math.max(lastId, payload.wish.id);
-      updateCounter(payload.total);
+      
+      const total = payload.total;
+      const nextRevealDepth = revealDepthForTotal(total);
+      if (nextRevealDepth !== currentRevealDepth) {
+        currentRevealDepth = nextRevealDepth;
+        renderBranches(currentRevealDepth);
+        blossomLayer.innerHTML = "";
+        renderedBlossoms.clear();
+        renderTreeAndStars(allWishes, false);
+      } else {
+        renderTreeAndStars(allWishes, true);
+      }
 
       form.reset();
       charCount.textContent = "0";
@@ -301,11 +526,12 @@
         try {
           window.hcaptcha.reset();
         } catch (_) {
-          /* widget henüz yüklenmemiş olabilir */
+          // Widget might not be loaded
         }
       }
       submitBtn.disabled = false;
       submitBtn.textContent = "Ağaca bırak";
     }
   });
+
 })();
