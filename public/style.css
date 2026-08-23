@@ -408,13 +408,14 @@ button {
   fill: #ffd4e2;
 }
 
-/* Native SVG Falling Petals */
-.svg-falling-petal {
-  fill: url(#petal-grad);
+/* Falling & Accumulating Sakura Petals Canvas */
+.petals-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  filter: drop-shadow(0 1px 3px rgba(255, 92, 141, 0.4));
-  transform-origin: center;
-  will-change: transform, opacity;
+  z-index: 6;
 }
 
 /* Blossom: 100% reliable cross-device rendering (Safari, Android, Chrome) */
