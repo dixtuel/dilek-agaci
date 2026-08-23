@@ -220,7 +220,6 @@
     g.setAttribute("tabindex", "0");
     g.setAttribute("role", "button");
     g.setAttribute("aria-label", wish.name ? `${wish.name}: ${wish.text}` : `Dilek: ${wish.text}`);
-    g.setAttribute("filter", "url(#blossom-glow)");
 
     // Large visible scale (26px - 34px diameter)
     const scale = 1.6 + (hashId(wish.id) % 35) / 100;

@@ -136,10 +136,10 @@ button {
 /* Luminous Moon */
 .moon-wrap {
   position: absolute;
-  top: clamp(35px, 7vh, 80px);
-  right: clamp(25px, 8vw, 110px);
-  width: clamp(70px, 12vw, 100px);
-  height: clamp(70px, 12vw, 100px);
+  top: clamp(25px, 6vh, 65px);
+  right: clamp(20px, 7vw, 95px);
+  width: clamp(65px, 11vw, 95px);
+  height: clamp(65px, 11vw, 95px);
 }
 
 .moon-halo {
@@ -267,9 +267,9 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: clamp(14px, 3vw, 24px) clamp(16px, 4vw, 40px);
+  padding: clamp(12px, 2.5vw, 20px) clamp(16px, 4vw, 40px);
   z-index: 20;
-  background: linear-gradient(180deg, rgba(11, 13, 27, 0.75) 0%, rgba(11, 13, 27, 0) 100%);
+  background: linear-gradient(180deg, rgba(11, 13, 27, 0.8) 0%, rgba(11, 13, 27, 0) 100%);
 }
 
 .wordmark {
@@ -327,16 +327,17 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding-top: 90px;
-  padding-bottom: 24px;
+  padding-top: 70px;
+  padding-bottom: 0;
   z-index: 5;
 }
 
 .tree-wrap {
   width: min(880px, 95vw);
   aspect-ratio: 9 / 10;
-  max-height: 82vh;
+  max-height: 78vh;
   position: relative;
+  z-index: 5;
 }
 
 #tree-svg {
@@ -359,19 +360,16 @@ button {
   stroke-linejoin: round;
 }
 
-/* Blossom: Stable, beautiful 5-petal Sakura (No transform-origin bug!) */
+/* Blossom: 100% reliable cross-device rendering (Safari, Android, Chrome) */
 .blossom {
   cursor: pointer;
+  filter: drop-shadow(0 2px 8px rgba(255, 92, 141, 0.5));
   animation: bloom 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 .blossom:hover,
 .blossom:focus-visible {
-  filter: url(#blossom-glow) brightness(1.2);
-}
-
-.blossom .petal {
-  transition: opacity 0.2s ease;
+  filter: drop-shadow(0 4px 14px rgba(255, 92, 141, 0.85)) brightness(1.2);
 }
 
 .blossom.ascending {
@@ -430,22 +428,46 @@ button {
   100% { transform: translateY(-6px) scale(1.08); }
 }
 
-/* Counter Pill */
+/* Organic Ground & Grass Terrain Mound */
+.ground-terrain {
+  position: relative;
+  width: 100%;
+  margin-top: -36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  z-index: 6;
+}
+
+.ground-svg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 110px;
+  pointer-events: none;
+}
+
+/* Counter Pill sits prominently above the grass hill */
 .counter-pill {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(20, 23, 46, 0.75);
+  background: rgba(20, 23, 46, 0.85);
   border: 1px solid var(--ink-line);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 999px;
-  padding: 0.5em 1.2em;
+  padding: 0.52em 1.25em;
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--ink-light);
+  font-size: 0.84rem;
+  color: var(--ink);
   letter-spacing: 0.01em;
-  margin-top: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  margin-bottom: 22px;
+  z-index: 8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 /* Wish Card Modal Dialog */
@@ -454,6 +476,7 @@ button {
   inset: 0;
   background: rgba(8, 10, 20, 0.65);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 60;
   animation: fade-in 0.2s ease-out;
 }
@@ -542,6 +565,7 @@ button {
   inset: 0;
   background: rgba(8, 10, 20, 0.65);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 50;
 }
 
@@ -769,8 +793,33 @@ textarea:focus {
   text-underline-offset: 2px;
 }
 
-/* Mobile Responsive */
+/* Mobile Responsive Adjustments */
 @media (max-width: 640px) {
+  .stage {
+    padding-top: 60px;
+    justify-content: flex-end;
+  }
+
+  .tree-wrap {
+    width: min(100%, 96vw);
+    aspect-ratio: 9 / 10;
+    max-height: 64vh;
+  }
+
+  .ground-terrain {
+    margin-top: -24px;
+  }
+
+  .ground-svg {
+    height: 85px;
+  }
+
+  .counter-pill {
+    font-size: 0.76rem;
+    margin-bottom: 16px;
+    padding: 0.46em 1.1em;
+  }
+
   .panel {
     top: auto;
     left: 0;
@@ -795,16 +844,6 @@ textarea:focus {
   @keyframes slide-up {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
-  }
-
-  .tree-wrap {
-    width: min(100%, 96vw);
-    aspect-ratio: 9 / 10;
-    max-height: 75vh;
-  }
-
-  .counter-pill {
-    font-size: 0.75rem;
   }
 }
 
