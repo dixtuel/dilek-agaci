@@ -1,12 +1,12 @@
 (() => {
   "use strict";
 
-  const VIEW_W = 800;
-  const VIEW_H = 900;
-  const MAX_DEPTH = 7;
+  const VIEW_W = 900;
+  const VIEW_H = 1000;
+  const MAX_DEPTH = 8;
   const SVG_NS = "http://www.w3.org/2000/svg";
   const SEED = 20260823;
-  const MAX_VISIBLE_BLOSSOMS = 120;
+  const MAX_VISIBLE_BLOSSOMS = 150;
 
   // Sakura blossom vibrant palette
   const HUES = ["sakura", "rose", "blush", "coral"];
@@ -34,11 +34,27 @@
   const rand = mulberry32(SEED);
 
   /**
-   * Builds the tree structure with organic Bézier curves
+   * Builds the majestic organic tree with roots, branches and wide canopy
    */
   function buildTree() {
     const segments = [];
+    const roots = [];
 
+    // 1. Organic Roots at base
+    function makeRoot(x1, y1, angle, length, width) {
+      const x2 = x1 + Math.sin(angle) * length;
+      const y2 = y1 + Math.cos(angle) * length;
+      const midX = (x1 + x2) / 2 + (rand() - 0.5) * 15;
+      const midY = (y1 + y2) / 2;
+      roots.push({ x1, y1, x2, y2, cx1: midX, cy1: midY, cx2: midX, cy2: midY, width });
+    }
+
+    makeRoot(VIEW_W / 2 - 8, VIEW_H - 25, -0.65, 55, 14);
+    makeRoot(VIEW_W / 2 + 8, VIEW_H - 25, 0.65, 55, 14);
+    makeRoot(VIEW_W / 2 - 4, VIEW_H - 25, -0.3, 35, 9);
+    makeRoot(VIEW_W / 2 + 4, VIEW_H - 25, 0.3, 35, 9);
+
+    // 2. Majestic Branching Tree
     function branch(x1, y1, angle, length, width, depth) {
       const x2 = x1 + Math.sin(angle) * length;
       const y2 = y1 - Math.cos(angle) * length;
@@ -49,51 +65,54 @@
 
       const perpX = Math.cos(angle);
       const perpY = Math.sin(angle);
-      const bendStrength = length * 0.22 * (rand() - 0.5);
+      const bendStrength = length * 0.24 * (rand() - 0.5);
 
       const offX = midX + perpX * bendStrength;
       const offY = midY + perpY * bendStrength;
 
-      const cx1 = x1 + (offX - x1) * 0.35;
-      const cy1 = y1 + (offY - y1) * 0.35;
-      const cx2 = offX + (x2 - offX) * 0.35;
-      const cy2 = offY + (y2 - offY) * 0.35;
+      const cx1 = x1 + (offX - x1) * 0.36;
+      const cy1 = y1 + (offY - y1) * 0.36;
+      const cx2 = offX + (x2 - offX) * 0.36;
+      const cy2 = offY + (y2 - offY) * 0.36;
 
       const isLeaf = depth >= MAX_DEPTH;
       segments.push({ x1, y1, x2, y2, cx1, cy1, cx2, cy2, depth, width, isLeaf });
 
       if (isLeaf) return;
 
-      const childCount = depth < 2 ? 2 : (rand() > 0.32 ? 2 : 3);
-      const spread = 0.42 + rand() * 0.28;
+      const childCount = depth < 2 ? 2 : (rand() > 0.35 ? 2 : 3);
+      const spread = depth < 3 ? 0.5 + rand() * 0.2 : 0.44 + rand() * 0.3;
 
       for (let i = 0; i < childCount; i++) {
         const t = childCount === 1 ? 0 : i / (childCount - 1) - 0.5;
-        const childAngle = angle + t * spread * 2 + (rand() - 0.5) * 0.16;
-        const childLength = length * (0.72 + rand() * 0.1);
-        const childWidth = width * 0.66;
+        const childAngle = angle + t * spread * 2 + (rand() - 0.5) * 0.15;
+        const childLength = length * (depth < 3 ? 0.78 + rand() * 0.08 : 0.72 + rand() * 0.1);
+        const childWidth = width * 0.68;
         branch(x2, y2, childAngle, childLength, childWidth, depth + 1);
       }
     }
 
-    // Trunk starts from bottom center
-    branch(VIEW_W / 2, VIEW_H - 30, 0, 138, 18, 0);
-    return segments;
+    // Trunk starts with majestic height and width
+    branch(VIEW_W / 2, VIEW_H - 25, 0, 165, 24, 0);
+    return { segments, roots };
   }
 
-  const SEGMENTS = buildTree();
+  const { segments: SEGMENTS, roots: ROOTS } = buildTree();
 
+  /**
+   * Meaningful dynamic tree growth stages based on wish count
+   */
   function revealDepthForTotal(total) {
-    if (total <= 0) return 3;
-    if (total < 10) return 4;
-    if (total < 30) return 5;
-    if (total < 70) return 6;
-    return MAX_DEPTH;
+    if (total <= 0) return 4; // Majestic starter tree even with 0 wishes!
+    if (total <= 8) return 5; // Sprouting young branches
+    if (total <= 25) return 6; // Towering crown growth
+    if (total <= 60) return 7; // Grand blossoming canopy
+    return MAX_DEPTH; // Full ancient legendary sakura tree
   }
 
   function anchorsForDepth(revealDepth) {
     return SEGMENTS.filter((s) => s.depth <= revealDepth && (s.depth === revealDepth || s.isLeaf)).map(
-      (s) => ({ x: s.x2, y: s.y2 })
+      (s) => ({ x: s.x2, y: s.y2, depth: s.depth })
     );
   }
 
@@ -118,16 +137,18 @@
     return `${days} gün önce`;
   }
 
-  // --- SVG Tree Setup ---
+  // --- SVG Tree Layers ---
   const svg = document.getElementById("tree-svg");
+  const rootLayer = document.createElementNS(SVG_NS, "g");
   const branchLayer = document.createElementNS(SVG_NS, "g");
   const blossomLayer = document.createElementNS(SVG_NS, "g");
+  svg.appendChild(rootLayer);
   svg.appendChild(branchLayer);
   svg.appendChild(blossomLayer);
 
   const skyWishes = document.getElementById("sky-wishes");
 
-  let currentRevealDepth = 3;
+  let currentRevealDepth = 4;
   let allWishes = [];
   let lastId = 0;
 
@@ -135,15 +156,28 @@
   const renderedStars = new Map();
 
   /**
-   * Render branches up to current depth
+   * Render roots and branches up to current reveal depth
    */
-  function renderBranches(revealDepth) {
+  function renderTreeStructure(revealDepth) {
+    // 1. Render roots
+    rootLayer.innerHTML = "";
+    ROOTS.forEach((r) => {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", `M ${r.x1},${r.y1} C ${r.cx1},${r.cy1} ${r.cx2},${r.cy2} ${r.x2},${r.y2}`);
+      path.setAttribute("stroke", "url(#bark-grad)");
+      path.setAttribute("stroke-width", r.width);
+      path.setAttribute("class", "branch");
+      path.setAttribute("fill", "none");
+      rootLayer.appendChild(path);
+    });
+
+    // 2. Render branches
     branchLayer.innerHTML = "";
     SEGMENTS.filter((s) => s.depth <= revealDepth).forEach((s) => {
       const path = document.createElementNS(SVG_NS, "path");
       path.setAttribute("d", `M ${s.x1},${s.y1} C ${s.cx1},${s.cy1} ${s.cx2},${s.cy2} ${s.x2},${s.y2}`);
       path.setAttribute("stroke", "url(#bark-grad)");
-      path.setAttribute("stroke-width", Math.max(1.8, s.width));
+      path.setAttribute("stroke-width", Math.max(2.2, s.width));
       path.setAttribute("class", "branch");
       path.setAttribute("fill", "none");
       branchLayer.appendChild(path);
@@ -186,15 +220,15 @@
     g.setAttribute("tabindex", "0");
     g.setAttribute("role", "button");
     g.setAttribute("aria-label", wish.name ? `${wish.name}: ${wish.text}` : `Dilek: ${wish.text}`);
-    g.setAttribute("filter", "url(#petal-shadow)");
+    g.setAttribute("filter", "url(#blossom-glow)");
 
-    // Large visible scale (24px - 32px diameter)
-    const scale = 1.5 + (hashId(wish.id) % 30) / 100;
+    // Large visible scale (26px - 34px diameter)
+    const scale = 1.6 + (hashId(wish.id) % 35) / 100;
     const petalColor = HUE_COLORS[hue] || "#ff5c8d";
 
-    // Invisible generous hitbox for easy mobile tapping (40px)
+    // Invisible generous hitbox for easy mobile tapping (42px)
     const hitbox = document.createElementNS(SVG_NS, "circle");
-    hitbox.setAttribute("r", 20);
+    hitbox.setAttribute("r", 21);
     hitbox.setAttribute("fill", "transparent");
     g.appendChild(hitbox);
 
@@ -203,9 +237,9 @@
       const petal = document.createElementNS(SVG_NS, "ellipse");
       petal.setAttribute("class", "petal");
       petal.setAttribute("cx", "0");
-      petal.setAttribute("cy", -6.2 * scale);
-      petal.setAttribute("rx", 3.8 * scale);
-      petal.setAttribute("ry", 6.8 * scale);
+      petal.setAttribute("cy", -6.5 * scale);
+      petal.setAttribute("rx", 3.9 * scale);
+      petal.setAttribute("ry", 7.0 * scale);
       petal.setAttribute("fill", petalColor);
       petal.setAttribute("opacity", "0.95");
       petal.setAttribute("transform", `rotate(${i * 72})`);
@@ -214,7 +248,7 @@
 
     // Golden center pistil
     const center = document.createElementNS(SVG_NS, "circle");
-    center.setAttribute("r", 2.8 * scale);
+    center.setAttribute("r", 3.0 * scale);
     center.setAttribute("fill", "#f59e0b");
     g.appendChild(center);
 
@@ -243,7 +277,7 @@
     star.className = "sky-star";
 
     const left = (hashId(wish.id) % 88 + 6);
-    const top = (hashId(wish.id + 7) % 40 + 8);
+    const top = (hashId(wish.id + 7) % 35 + 8);
 
     star.style.left = `${left}%`;
     star.style.top = `${top}%`;
@@ -303,9 +337,9 @@
           const anchorIdx = hashId(wish.id) % anchors.length;
           const anchor = anchors[anchorIdx];
 
-          // Natural organic offset
-          const offsetX = (hashId(wish.id + 11) % 25) - 12;
-          const offsetY = (hashId(wish.id + 17) % 25) - 12;
+          // Natural organic offset around branch tips
+          const offsetX = (hashId(wish.id + 11) % 28) - 14;
+          const offsetY = (hashId(wish.id + 17) % 28) - 14;
 
           const hue = HUES[hashId(wish.id + 1) % HUES.length];
           const blossom = makeBlossom(anchor.x + offsetX, anchor.y + offsetY, hue, wish);
@@ -351,7 +385,6 @@
         allWishes = wishes;
         updated = true;
       } else if (wishes && wishes.length > 0) {
-        // Prevent duplicates
         const existingIds = new Set(allWishes.map((w) => w.id));
         const newUnique = wishes.filter((w) => !existingIds.has(w.id));
         if (newUnique.length > 0) {
@@ -364,7 +397,7 @@
         const nextRevealDepth = revealDepthForTotal(total);
         if (nextRevealDepth !== currentRevealDepth) {
           currentRevealDepth = nextRevealDepth;
-          renderBranches(currentRevealDepth);
+          renderTreeStructure(currentRevealDepth);
           blossomLayer.innerHTML = "";
           renderedBlossoms.clear();
           renderTreeAndStars(allWishes, false);
@@ -384,8 +417,8 @@
     }
   }
 
-  // Initial draw
-  renderBranches(currentRevealDepth);
+  // Initial draw: majestic roots and starter canopy
+  renderTreeStructure(currentRevealDepth);
   poll(true);
   setInterval(() => poll(false), 15000);
 
@@ -465,7 +498,6 @@
         return;
       }
 
-      // Add new wish to list and immediately render
       allWishes.push(payload.wish);
       lastId = Math.max(lastId, payload.wish.id);
 
@@ -473,7 +505,7 @@
       const nextRevealDepth = revealDepthForTotal(total);
       if (nextRevealDepth !== currentRevealDepth) {
         currentRevealDepth = nextRevealDepth;
-        renderBranches(currentRevealDepth);
+        renderTreeStructure(currentRevealDepth);
         blossomLayer.innerHTML = "";
         renderedBlossoms.clear();
         renderTreeAndStars(allWishes, false);
