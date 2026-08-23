@@ -470,12 +470,12 @@ button {
   pointer-events: none;
 }
 
-/* Counter Pill sits prominently above the grass hill */
 .counter-pill {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   background: rgba(20, 23, 46, 0.85);
   border: 1px solid var(--ink-line);
   backdrop-filter: blur(8px);
@@ -489,6 +489,15 @@ button {
   margin-bottom: 22px;
   z-index: 8;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.counter-pill span {
+  display: inline;
+}
+
+.counter-pill strong {
+  font-weight: 700;
+  color: var(--sakura-pale);
 }
 
 /* Wish Card Modal Dialog */

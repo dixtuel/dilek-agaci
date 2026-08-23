@@ -362,11 +362,11 @@
     const counter = document.getElementById("counter");
     if (!counter) return;
     if (total <= 0) {
-      counter.innerHTML = `${MINI_BLOSSOM_SVG} ağaç henüz sessiz, ilk dileği sen bırak`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>ağaç henüz sessiz, ilk dileği sen bırak</span>`;
     } else if (starCount <= 0) {
-      counter.innerHTML = `${MINI_BLOSSOM_SVG} bu ağaçta <strong>${total}</strong> dilek çiçek açtı`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span>bu ağaçta <strong>${total}</strong> dilek çiçek açtı</span>`;
     } else {
-      counter.innerHTML = `${MINI_BLOSSOM_SVG} <strong>${treeCount}</strong> çiçek • ✨ <strong>${starCount}</strong> yıldız`;
+      counter.innerHTML = `${MINI_BLOSSOM_SVG} <span><strong>${treeCount}</strong> çiçek • ✨ <strong>${starCount}</strong> yıldız</span>`;
     }
   }
 
