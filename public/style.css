@@ -542,6 +542,19 @@ button {
   opacity: 0.35;
 }
 
+/* Yaprak "bulutları" — dal uçlarında yumuşak, düşük opaklıklı kümeler;
+   az dallı genç bir ağaçta bile hacim/dolgunluk hissi verir. İnce
+   yaprak/tomurcuk katmanının ALTINDA durur. */
+.tree-foliage-cloud {
+  fill: var(--sakura-pale);
+  opacity: 0.4;
+}
+
+.tree-foliage-cloud-alt {
+  fill: var(--sakura-main);
+  opacity: 0.32;
+}
+
 /* Delicate Sakura Leaves & Blossom Buds on branches */
 .tree-leaf {
   fill: var(--sakura-main);

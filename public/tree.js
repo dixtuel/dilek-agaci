@@ -109,7 +109,7 @@
     }
 
     // Trunk starts with majestic height and width
-    branch(VIEW_W / 2, GROUND_Y, 0, 220, 40, 0);
+    branch(VIEW_W / 2, GROUND_Y, 0, 205, 40, 0);
     return { segments, roots };
   }
 
@@ -338,6 +338,36 @@
     // iyi dağılmış yaprak/tomurcuk ile daha dolgun, gerçek bir sakura
     // kanopisi görünümü hedeflendi.
     leafLayer.innerHTML = "";
+
+    // 3a. Yaprak "bulutları" (cloud/cluster) — gerçek prosedürel ağaç
+    // render tekniklerinde yapraklar dal sayısına birebir bağlı tek tek
+    // değil, dal uçlarında yumuşak kümeler halinde çizilir; böylece az
+    // dallı genç bir ağaç bile dolgun görünür (bkz. araştırma: "leaves
+    // clustered into clouds of cells faithful to branching structure").
+    // Bu katman, alttaki hacmi verir; üstüne binen ince yaprak/tomurcuklar
+    // dokuyu tamamlar.
+    const tipSegments = SEGMENTS.filter((s) => s.depth <= revealDepth && (s.depth === revealDepth || s.isLeaf));
+    tipSegments.forEach((s, ti) => {
+      const cloudCount = 3 + (hashId(ti + 500) % 2); // 3-4 leke
+      for (let c = 0; c < cloudCount; c++) {
+        const jitterAngle = (hashId(ti * 7 + c + 1) % 360) * (Math.PI / 180);
+        const jitterR = 4 + (hashId(ti * 11 + c + 2) % 10);
+        const cx = s.x2 + Math.cos(jitterAngle) * jitterR;
+        const cy = s.y2 + Math.sin(jitterAngle) * jitterR;
+        const r = 11 + (hashId(ti * 13 + c + 3) % 8);
+        const cloud = document.createElementNS(SVG_NS, "ellipse");
+        cloud.setAttribute("cx", cx);
+        cloud.setAttribute("cy", cy);
+        cloud.setAttribute("rx", r);
+        cloud.setAttribute("ry", r * (0.75 + (hashId(ti * 17 + c) % 20) / 100));
+        cloud.setAttribute(
+          "class",
+          hashId(ti * 19 + c) % 2 === 0 ? "tree-foliage-cloud" : "tree-foliage-cloud-alt"
+        );
+        leafLayer.appendChild(cloud);
+      }
+    });
+
     const activeSegments = SEGMENTS.filter((s) => s.depth >= 2 && s.depth <= revealDepth);
     activeSegments.forEach((s, idx) => {
       const angle = Math.atan2(s.y2 - s.y1, s.x2 - s.x1);
