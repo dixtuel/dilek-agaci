@@ -387,6 +387,72 @@ button {
   stroke-linejoin: round;
 }
 
+/* Organic Foliage Canopy (Soft Sakura Clusters behind branches) */
+.foliage-cloud {
+  pointer-events: none;
+}
+
+.foliage-cluster {
+  filter: drop-shadow(0 2px 8px rgba(255, 92, 141, 0.25));
+  animation: gentle-foliage-sway 8s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes gentle-foliage-sway {
+  0% { transform: rotate(0deg) scale(0.98); }
+  50% { transform: rotate(1deg) scale(1.02); }
+  100% { transform: rotate(-1deg) scale(0.99); }
+}
+
+/* Falling Sakura Petals Particle System */
+.falling-petals {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
+}
+
+.sakura-petal {
+  position: absolute;
+  top: -30px;
+  background: linear-gradient(135deg, rgba(255, 183, 197, 0.92) 0%, rgba(255, 117, 151, 0.78) 100%);
+  border-radius: 12px 2px 12px 2px;
+  box-shadow: 0 1px 4px rgba(255, 92, 141, 0.3);
+  pointer-events: none;
+  opacity: 0;
+  animation: petal-fall linear infinite, petal-sway ease-in-out infinite alternate;
+}
+
+@keyframes petal-fall {
+  0% {
+    top: -25px;
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.85;
+  }
+  88% {
+    opacity: 0.8;
+  }
+  100% {
+    top: 104vh;
+    opacity: 0;
+  }
+}
+
+@keyframes petal-sway {
+  0% {
+    transform: translateX(-25px) rotate(0deg) scale(0.9);
+  }
+  50% {
+    transform: translateX(35px) rotate(180deg) scale(1.06);
+  }
+  100% {
+    transform: translateX(-20px) rotate(360deg) scale(0.95);
+  }
+}
+
 /* Blossom: 100% reliable cross-device rendering (Safari, Android, Chrome) */
 .blossom {
   cursor: pointer;
