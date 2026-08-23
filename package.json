@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Dilek Ağacı — ortak dilek ağacı sitesi (statik önyüz + API tek serviste)",
   "main": "server/server.js",
-  "author": "dixtuel <asrinklcc@dxtl.com.tr>",
+  "author": "dixtuel",
   "license": "MIT",
   "homepage": "https://dxtl.com.tr",
   "scripts": {
