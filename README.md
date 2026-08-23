@@ -121,4 +121,4 @@ Node.js ortamını destekleyen herhangi bir PaaS servisinde veya bağımsız Lin
 ## Lisans
 
 Bu proje [MIT Lisansı](LICENSE) altında sunulmaktadır.  
-Copyright (c) 2026 **Asrın Kılıç (dixtuel)**.
+Copyright (c) 2026 **dixtuel**.
