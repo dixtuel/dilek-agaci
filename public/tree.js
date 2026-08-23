@@ -438,36 +438,56 @@
     lastRenderedTotal = total;
     leafLayer.innerHTML = "";
 
-    // 3a. Dal uçlarında GERÇEK küçük sakura çiçeği kümeleri (mini-sakura
-    // sembolü, <use> ile). Önceki bulanık/yarı saydam "leke" denemesi hiç
-    // çiçeğe benzemiyordu ve kalitesizdi — gerçek referans fotoğraflardaki
-    // sakura ağaçları uzaktan bulut gibi görünür ama bu, binlerce KÜÇÜK
-    // AYRI çiçeğin yoğun şekilde üst üste binmesinden kaynaklanır, bulanık
-    // blob'lardan değil. Her dal ucuna sıkı, jitter'lı bir "pom-pom" kümesi
-    // halinde mini çiçek yerleştirilir.
+    // 3a. GERÇEK küçük sakura çiçekleri (mini-sakura sembolü, <use> ile).
+    // Gerçek referans fotoğraflar (tam çiçek açmış sakura dalları) net
+    // gösteriyor: çiçekler yalnız dal UCUNDA bir küme değil, dalın
+    // TAMAMI boyunca o kadar yoğun ki dal çizgisi neredeyse tamamen
+    // örtülüyor, yalnız ara ara koyu dal parçası görünüyor. Bu yüzden
+    // çiçekler artık yalnız uç noktada değil, çiçeklenme bölgesindeki
+    // (depth >= 3) HER segmentin tüm uzunluğu boyunca dağıtılıyor.
     const flowerBase = flowerBaseForTotal(total);
-    const flowerJitterSpan = Math.max(2, Math.round(flowerBase * 0.3));
-    const clusterRadius = 9 + flowerBase * 0.4;
+    const clusterRadius = 6 + flowerBase * 0.16;
 
-    const tipSegments = SEGMENTS.filter((s) => s.depth <= revealDepth && (s.depth === revealDepth || s.isLeaf));
-    tipSegments.forEach((s, ti) => {
-      const flowerCount = Math.round(flowerBase + (hashId(ti + 500) % flowerJitterSpan));
-      for (let c = 0; c < flowerCount; c++) {
-        const jitterAngle = (hashId(ti * 7 + c + 1) % 360) * (Math.PI / 180);
-        // Kümenin merkezine yakın çiçekler daha yoğun (sqrt dağılımı),
-        // kenarlara doğru seyrekleşerek yuvarlak/organik bir siluet verir.
-        const jitterR = Math.sqrt((hashId(ti * 11 + c + 2) % 100) / 100) * clusterRadius;
-        const cx = s.x2 + Math.cos(jitterAngle) * jitterR;
-        const cy = s.y2 + Math.sin(jitterAngle) * jitterR;
-        const scale = 0.62 + (hashId(ti * 13 + c + 3) % 45) / 100;
-        const rot = hashId(ti * 17 + c + 4) % 360;
-        const flower = document.createElementNS(SVG_NS, "use");
-        flower.setAttribute("href", "#mini-sakura-symbol");
-        flower.setAttribute("width", 16);
-        flower.setAttribute("height", 16);
-        flower.setAttribute("transform", `translate(${cx} ${cy}) scale(${scale.toFixed(2)}) rotate(${rot})`);
-        flower.setAttribute("class", "mini-sakura-fill");
-        leafLayer.appendChild(flower);
+    function placeFlower(cx, cy, seed) {
+      const scale = 0.6 + (hashId(seed) % 50) / 100;
+      const rot = hashId(seed + 1) % 360;
+      const flower = document.createElementNS(SVG_NS, "use");
+      flower.setAttribute("href", "#mini-sakura-symbol");
+      flower.setAttribute("width", 16);
+      flower.setAttribute("height", 16);
+      flower.setAttribute("transform", `translate(${cx.toFixed(1)} ${cy.toFixed(1)}) scale(${scale.toFixed(2)}) rotate(${rot})`);
+      flower.setAttribute("class", "mini-sakura-fill");
+      leafLayer.appendChild(flower);
+    }
+
+    const bloomSegments = SEGMENTS.filter((s) => s.depth >= 3 && s.depth <= revealDepth);
+    bloomSegments.forEach((s, si) => {
+      // Dal ucuna yakın segmentler (isLeaf veya tam revealDepth) daha yoğun;
+      // gövdeye yakın (depth 3-4) segmentler daha seyrek — gerçek ağaçta da
+      // çiçeklenme dal uçlarına doğru yoğunlaşır.
+      const depthFactor = 0.5 + (0.6 * (s.depth - 2)) / Math.max(1, revealDepth - 2);
+      const perSegment = Math.max(3, Math.round(flowerBase * depthFactor * 0.85));
+
+      // 1) Dalın TAMAMI boyunca dağılan çiçekler — dal çizgisini örter.
+      for (let c = 0; c < perSegment; c++) {
+        const t = 0.1 + (hashId(si * 13 + c + 1) % 88) / 100;
+        const px = s.x1 + (s.x2 - s.x1) * t;
+        const py = s.y1 + (s.y2 - s.y1) * t;
+        const jitterAngle = (hashId(si * 7 + c + 2) % 360) * (Math.PI / 180);
+        const jitterR = Math.sqrt((hashId(si * 11 + c + 3) % 100) / 100) * (clusterRadius * 0.55);
+        placeFlower(px + Math.cos(jitterAngle) * jitterR, py + Math.sin(jitterAngle) * jitterR, si * 23 + c + 4);
+      }
+
+      // 2) Dal ucunda ekstra yoğun "pom-pom" kümesi (yalnız gerçek uç
+      // segmentlerinde: isLeaf ya da tam revealDepth) — gerçek fotoğraflardaki
+      // gibi dal uçları en yoğun, en dolu bloom noktası olsun.
+      if (s.isLeaf || s.depth === revealDepth) {
+        const tipCount = Math.max(4, Math.round(flowerBase * 0.7));
+        for (let c = 0; c < tipCount; c++) {
+          const jitterAngle = (hashId(si * 29 + c + 5) % 360) * (Math.PI / 180);
+          const jitterR = Math.sqrt((hashId(si * 31 + c + 6) % 100) / 100) * clusterRadius;
+          placeFlower(s.x2 + Math.cos(jitterAngle) * jitterR, s.y2 + Math.sin(jitterAngle) * jitterR, si * 37 + c + 7);
+        }
       }
     });
 
