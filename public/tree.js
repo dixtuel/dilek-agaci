@@ -8,13 +8,13 @@
   const SEED = 20260823;
   const MAX_VISIBLE_BLOSSOMS = 150;
 
-  // Sakura blossom vibrant palette
-  const HUES = ["sakura", "rose", "blush", "coral"];
+  // Sakura blossom palette (Pastel Sakura, Pudra Pembe, Gül Kurusu, İpeksi Krem)
+  const HUES = ["sakura", "pale", "accent", "cream"];
   const HUE_COLORS = {
-    sakura: "#ff5c8d",
-    rose: "#ff7597",
-    blush: "#ff85a2",
-    coral: "#ff6b9d"
+    sakura: "#FCAEB8",
+    pale: "#FFD1DC",
+    accent: "#EB8298",
+    cream: "#FFF2F5"
   };
 
   /**
@@ -299,10 +299,12 @@
       g.appendChild(petal);
     }
 
-    // Golden center pistil
+    // Soft pistil center
     const center = document.createElementNS(SVG_NS, "circle");
-    center.setAttribute("r", 3.0 * scale);
-    center.setAttribute("fill", "#f59e0b");
+    center.setAttribute("r", 2.8 * scale);
+    center.setAttribute("fill", "#FFF2F5");
+    center.setAttribute("stroke", "#EB8298");
+    center.setAttribute("stroke-width", "0.6");
     g.appendChild(center);
 
     // Click & Touch events to open wish card
@@ -410,8 +412,8 @@
     updateCounter(treeWishes.length, starWishes.length, wishes.length);
   }
 
-  const MINI_BLOSSOM_SVG = `<svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff7597" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#ff5c8d" transform="rotate(288)"/><circle cx="0" cy="0" r="2.2" fill="#f59e0b"/></g></svg>`;
-  const MINI_STAR_SVG = `<svg class="mini-star-svg" viewBox="0 0 16 16" width="14" height="14" style="vertical-align:middle;margin:0 2px;"><path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#f59e0b"/></svg>`;
+  const MINI_BLOSSOM_SVG = `<svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17"><g transform="translate(12,12)"><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(144)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(216)"/><ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(288)"/><circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/></g></svg>`;
+  const MINI_STAR_SVG = `<svg class="mini-star-svg" viewBox="0 0 16 16" width="14" height="14" style="vertical-align:middle;margin:0 2px;"><path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#E8E6F0"/></svg>`;
 
   function updateCounter(treeCount, starCount, total) {
     const counter = document.getElementById("counter");
@@ -555,7 +557,7 @@
     context.moveTo(0, -h / 2);
     context.bezierCurveTo(w, -h / 4, w, h / 4, 0, h / 2);
     context.bezierCurveTo(-w, h / 4, -w, -h / 4, 0, -h / 2);
-    context.fillStyle = `rgba(255, 105, 145, ${opacity.toFixed(3)})`;
+    context.fillStyle = `rgba(255, 209, 220, ${opacity.toFixed(3)})`;
     context.fill();
     context.restore();
   }
