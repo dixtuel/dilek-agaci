@@ -138,13 +138,15 @@
     return MAX_DEPTH; // ~150+ dilekte tam olgun, efsanevi ağaç
   }
 
+  // Gövdeye/köke en yakın ilk birkaç derinlik (0: gövde, 1-2: ilk kalın
+  // çatallanma) dilek anchor'ı OLAMAZ — gerçek bir sakura çiçeği ana gövde
+  // veya kalın ilk dallanmada değil, incelen dallarda açar. Yalnızca bu
+  // eşiğin ÜSTÜNDEKİ dallar aday anchor olur (dal ucunda olma zorunluluğu
+  // yine yok, ama gövdeye yapışık da olamaz).
+  const MIN_BLOSSOM_ANCHOR_DEPTH = 3;
+
   function anchorsForDepth(revealDepth) {
-    // Yalnızca en yeni büyüme ucu (depth === revealDepth) değil, o ana kadar
-    // açılmış TÜM dallar aday anchor'dır — bir dilek çiçeği dalın ucunda
-    // olmak zorunda değil, gövdeye yakın bir dalda da açabilir. Bu, anchor
-    // havuzunu büyük ölçüde genişletir (aynı derinlikte de kalabalık
-    // yığılmayı azaltır).
-    return SEGMENTS.filter((s) => s.depth <= revealDepth).map(
+    return SEGMENTS.filter((s) => s.depth >= MIN_BLOSSOM_ANCHOR_DEPTH && s.depth <= revealDepth).map(
       (s) => ({ x: s.x2, y: s.y2, depth: s.depth })
     );
   }
