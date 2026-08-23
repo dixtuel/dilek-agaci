@@ -478,6 +478,8 @@
 
   // --- Native SVG Real-Time Sakura Petal Physics Engine ---
   const activePetals = [];
+  const groundPetals = [];
+  const MAX_GROUND_PETALS = 16;
   let petalAnimationId = null;
   let lastSpawnTime = 0;
 
@@ -490,31 +492,28 @@
 
     const path = document.createElementNS(SVG_NS, "path");
     // Organic curved sakura petal path centered at (0, 0)
-    path.setAttribute("d", "M 0,0 C -4.5,-2.5 -6.5,-8 0,-12 C 6.5,-8 4.5,-2.5 0,0 Z");
+    path.setAttribute("d", "M 0,0 C -4,-2 -5.5,-7 0,-10.5 C 5.5,-7 4,-2 0,0 Z");
     path.setAttribute("class", "svg-falling-petal");
     fallingPetalsLayer.appendChild(path);
 
-    const startX = anchor.x + (Math.random() * 16 - 8);
-    const startY = anchor.y + (Math.random() * 12 - 6);
+    const startX = anchor.x + (Math.random() * 10 - 5);
+    const startY = anchor.y + (Math.random() * 8 - 4);
 
     const petal = {
       el: path,
       startX,
       x: startX,
       y: startY,
-      vy: 1.15 + Math.random() * 0.75, // downward gravity velocity
-      swayFreq: 0.022 + Math.random() * 0.014,
-      swayAmp: 20 + Math.random() * 16,
-      phase: Math.random() * Math.PI * 2,
-      angle: Math.random() * 360,
-      rotSpeed: (Math.random() - 0.5) * 1.8,
-      flip: Math.random() * Math.PI,
-      flipSpeed: 0.028 + Math.random() * 0.02,
-      scale: 0.85 + Math.random() * 0.35,
+      vy: 0.65 + Math.random() * 0.45, // Gentle, slow, peaceful gravity
+      swayFreq: 0.016 + Math.random() * 0.01,
+      swayAmp: 8 + Math.random() * 8, // Gentle side-to-side drift (+-8-16px)
+      baseAngle: Math.random() * 40 - 20,
+      flipSpeed: 0.02 + Math.random() * 0.015,
+      scale: 0.8 + Math.random() * 0.35,
       opacity: 0,
       t: 0,
-      groundY: 935 + Math.random() * 25,
-      landed: false,
+      groundY: 932 + Math.random() * 24, // Grass mound landing line
+      landAngle: Math.random() * 60 - 30,
     };
 
     activePetals.push(petal);
@@ -522,48 +521,71 @@
 
   function updatePetalsPhysics() {
     const now = Date.now();
-    // Spawn a fresh petal every ~2 seconds if under limit (max 5-6 active)
-    if (now - lastSpawnTime > 1900 && activePetals.length < 6 && !document.hidden) {
+    // Spawn steady flow: every 650 - 900ms, up to 8 drifting petals in air
+    if (now - lastSpawnTime > 750 && activePetals.length < 8 && !document.hidden) {
       spawnSinglePetal();
       lastSpawnTime = now;
     }
 
+    // 1. Update airborne petals
     for (let i = activePetals.length - 1; i >= 0; i--) {
       const p = activePetals[i];
       p.t++;
 
-      // Gentle spawn fade-in during first 15 frames
-      if (p.t < 16) {
-        p.opacity = (p.t / 16) * 0.9;
+      // Gentle birth fade-in at branch tip
+      if (p.t < 14) {
+        p.opacity = (p.t / 14) * 0.88;
       }
 
-      if (!p.landed) {
-        p.y += p.vy;
-        p.x = p.startX + Math.sin(p.t * p.swayFreq + p.phase) * p.swayAmp;
-        p.angle += p.rotSpeed;
-        p.flip += p.flipSpeed;
+      p.y += p.vy;
+      p.x = p.startX + Math.sin(p.t * p.swayFreq) * p.swayAmp;
+      const angle = p.baseAngle + Math.sin(p.t * 0.025) * 22;
+      const flip = p.t * p.flipSpeed;
+      const scaleX = p.scale * (0.35 + Math.abs(Math.cos(flip)) * 0.65);
 
-        // Check if petal reached the grass mound
-        if (p.y >= p.groundY) {
-          p.landed = true;
-          p.y = p.groundY;
+      // Check landing on the grass mound
+      if (p.y >= p.groundY) {
+        p.y = p.groundY;
+        p.opacity = 0.72;
+
+        // Position flat on grass
+        p.el.setAttribute(
+          "transform",
+          `translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)}) rotate(${p.landAngle.toFixed(1)}) scale(${(p.scale * 0.88).toFixed(2)}, ${(p.scale * 0.45).toFixed(2)})`
+        );
+        p.el.setAttribute("opacity", p.opacity.toFixed(2));
+
+        // Transfer from airborne to ground accumulation pool
+        groundPetals.push(p);
+        activePetals.splice(i, 1);
+
+        // If ground pool exceeds capacity, smoothly fade & remove oldest
+        if (groundPetals.length > MAX_GROUND_PETALS) {
+          const oldest = groundPetals.shift();
+          oldest.fading = true;
         }
-      } else {
-        // Landing on grass: gently fade out
-        p.opacity -= 0.025;
-        if (p.opacity <= 0) {
-          p.el.remove();
-          activePetals.splice(i, 1);
-          continue;
-        }
+        continue;
       }
 
-      const scaleX = p.scale * (0.4 + Math.abs(Math.cos(p.flip)) * 0.6);
       p.el.setAttribute(
         "transform",
-        `translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)}) rotate(${p.angle.toFixed(1)}) scale(${scaleX.toFixed(2)}, ${p.scale.toFixed(2)})`
+        `translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)}) rotate(${angle.toFixed(1)}) scale(${scaleX.toFixed(2)}, ${p.scale.toFixed(2)})`
       );
       p.el.setAttribute("opacity", p.opacity.toFixed(2));
+    }
+
+    // 2. Update fading ground petals
+    for (let j = groundPetals.length - 1; j >= 0; j--) {
+      const gp = groundPetals[j];
+      if (gp.fading) {
+        gp.opacity -= 0.015;
+        if (gp.opacity <= 0) {
+          gp.el.remove();
+          groundPetals.splice(j, 1);
+        } else {
+          gp.el.setAttribute("opacity", gp.opacity.toFixed(2));
+        }
+      }
     }
 
     if (!document.hidden) {
