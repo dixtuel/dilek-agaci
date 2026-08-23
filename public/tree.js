@@ -492,7 +492,22 @@
   renderTreeStructure(currentRevealDepth);
   initFallingPetals();
   poll(true);
-  setInterval(() => poll(false), 15000);
+
+  // CPU & Battery Saver: Pause polling when tab is inactive (Page Visibility API)
+  let pollInterval = setInterval(() => poll(false), 15000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+    } else {
+      poll(false);
+      if (!pollInterval) {
+        pollInterval = setInterval(() => poll(false), 15000);
+      }
+    }
+  });
 
   // --- Wish Form Panel Controls ---
   const panel = document.getElementById("panel");

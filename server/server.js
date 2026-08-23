@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const zlib = require("zlib");
 const { z } = require("zod");
 
 const { init, createWish, listSince, totalWishes } = require("./db");
@@ -11,16 +12,17 @@ const { moderateWish } = require("./moderation");
 const { verifyHcaptcha } = require("./hcaptcha");
 
 const app = express();
-// Barındırıcının tek bir edge proxy'si arkasında çalışır (Render, Railway vb.);
-// bu sayede X-Forwarded-For yalnızca gerçek proxy'den geldiğinde güvenilir sayılır
-// ve rate limiting IP sahteciliğiyle atlatılamaz.
+
+// Trust reverse proxy (Render, Cloudflare, etc.)
 app.set("trust proxy", 1);
+app.disable("x-powered-by");
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+// Security Headers
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -41,15 +43,45 @@ app.use(
     },
   })
 );
+
 app.use(
   cors({
     origin: allowedOrigins.length ? allowedOrigins : false,
   })
 );
-app.use(express.json({ limit: "10kb" }));
 
-// index.html, hCaptcha site key'i (gizli değil, herkese açık) sunucu tarafında
-// gömerek servis eder; diğer statik dosyalar olduğu gibi sunulur.
+// Lightweight JSON parser limited to 5kb to protect memory on 512MB RAM
+app.use(express.json({ limit: "5kb" }));
+
+// Lightweight built-in response compression middleware (Gzip / Deflate)
+app.use((req, res, next) => {
+  const acceptEncoding = req.headers["accept-encoding"] || "";
+  if (!acceptEncoding.includes("gzip") || req.method === "HEAD") {
+    return next();
+  }
+
+  const originalSend = res.send;
+  res.send = function (body) {
+    // Only compress text / json payloads larger than 512 bytes
+    if (typeof body === "string" || Buffer.isBuffer(body)) {
+      const contentType = res.getHeader("Content-Type") || "";
+      if (
+        (contentType.includes("json") || contentType.includes("html") || contentType.includes("text") || contentType.includes("css") || contentType.includes("javascript")) &&
+        body.length > 512
+      ) {
+        res.setHeader("Content-Encoding", "gzip");
+        res.removeHeader("Content-Length");
+        const buf = Buffer.isBuffer(body) ? body : Buffer.from(body, "utf8");
+        const gzipped = zlib.gzipSync(buf, { level: 6 });
+        return originalSend.call(this, gzipped);
+      }
+    }
+    return originalSend.call(this, body);
+  };
+  next();
+});
+
+// Cache static files efficiently for 512MB RAM & 0.15 CPU hosts
 const publicDir = path.join(__dirname, "..", "public");
 const indexTemplate = fs.readFileSync(path.join(publicDir, "index.html"), "utf8");
 const renderedIndex = indexTemplate.replace(
@@ -58,9 +90,22 @@ const renderedIndex = indexTemplate.replace(
 );
 
 app.get(["/", "/index.html"], (req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
   res.type("html").send(renderedIndex);
 });
-app.use(express.static(publicDir, { index: false }));
+
+// Aggressive caching for static assets with cache-busting query strings
+app.use(
+  express.static(publicDir, {
+    index: false,
+    maxAge: "1d",
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".css") || filePath.endsWith(".js") || filePath.endsWith(".svg")) {
+        res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+      }
+    },
+  })
+);
 
 const wishSchema = z.object({
   name: z.string().trim().max(40).optional().or(z.literal("")),
@@ -68,11 +113,10 @@ const wishSchema = z.object({
   hcaptchaToken: z.string().min(1),
 });
 
-// Barındırıcının önünde ayrıca bir edge/WAF katmanı yoksa bu, tek savunma
-// katmanı olur; hCaptcha ile birlikte spam/otomasyonu önemli ölçüde azaltır.
+// Global submission rate limiter: Allow bursts so 5+ users can write concurrently
 const submitLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  limit: 5,
+  windowMs: 2 * 60 * 1000, // 2 minutes window per IP
+  limit: 8,                // 8 wishes per 2 min per IP
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -81,6 +125,10 @@ app.get("/api/wishes", async (req, res, next) => {
   try {
     const since = Number.parseInt(req.query.since, 10) || 0;
     const limit = Math.min(Number.parseInt(req.query.limit, 10) || 200, 500);
+
+    // Dynamic cache header for API polling
+    res.setHeader("Cache-Control", "no-cache, private");
+
     const [wishes, total] = await Promise.all([listSince(since, limit), totalWishes()]);
     res.json({ wishes, total });
   } catch (err) {
@@ -113,6 +161,7 @@ app.post("/api/wishes", submitLimiter, async (req, res, next) => {
       });
     }
 
+    // Handles concurrent multi-user write with retry queue
     const wish = await createWish({ name, text });
     const total = await totalWishes();
     res.status(201).json({ wish, total });
@@ -130,7 +179,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("Express hatası:", err.message);
   res.status(500).json({ error: "Beklenmeyen bir hata oluştu." });
 });
 
@@ -138,9 +187,12 @@ const PORT = process.env.PORT || 3020;
 
 init()
   .then(() => {
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Dilek Ağacı ${PORT} portunda çalışıyor.`);
     });
+    // KeepAlive timeout optimization for low memory container proxies
+    server.keepAliveTimeout = 65000;
+    server.headersTimeout = 66000;
   })
   .catch((err) => {
     console.error("Veritabanı başlatılamadı:", err);
