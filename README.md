@@ -1,79 +1,39 @@
 # Dilek Ağacı
 
-[![Siteyi ziyaret et](https://img.shields.io/badge/dilekagaci.onrender.com-canlı_site-e8785a?style=for-the-badge&logo=googlechrome&logoColor=white)](https://dilekagaci.onrender.com)
+[![Siteyi ziyaret et](https://img.shields.io/badge/dilekagaci.dxtl.com.tr-canlı_site-e8785a?style=for-the-badge&logo=cloudflare&logoColor=white)](https://dilekagaci.dxtl.com.tr)
 
-Herkesin ortak gördüğü, dilek yazıldıkça çiçek açan bir dilek ağacı sitesi. Tek bir Node.js
-servisi hem statik önyüzü hem de API'yi sunar; veritabanı Turso (bulut tabanlı, SQLite uyumlu)
-olduğu için hangi ücretsiz Node barındırıcısına deploy edersen et veri kaybolmaz.
+Herkesin ortak gördüğü, dilek yazıldıkça çiçek açan bir dilek ağacı sitesi. İster standart **Node.js/Express** sunucusunda (Render, VPS, Docker), ister **Cloudflare Pages / Workers** Edge ortamında %100 uyumlu olarak çalıştırılabilir. Veritabanı **Turso (bulut tabanlı libSQL/SQLite)** olduğu için hangi platforma deploy ederseniz edin veriler kalıcı ve eşzamanlıdır.
 
-> Ücretsiz planda barındığı için site birkaç dakika boyunca istek almazsa uyur; ilk açılış
-> isteği birkaç saniye gecikebilir, bu normaldir.
+## Mimari — Neden Bu Seçimler?
 
-## Mimari — neden bu seçimler
+- **Çift Çalışma Modu (Dual Runtime)**:
+  - **Cloudflare Pages + Functions**: Statik varlıklar (HTML, CSS, JS) Cloudflare global CDN'inden **sınırsız ve ücretsiz** sunulur. API (`/api/wishes`) ise Pages Functions üzerinde **0 ms Cold Start** ile Edge'de çalışır.
+  - **Node.js / Express**: `server/server.js` üzerinden klasik Docker, VPS veya Render konteynerlerinde çalışmaya devam eder.
+- **Turso (libSQL)**: Kalıcı bulut SQLite veritabanı. `CompressionStream` ve `zlib` ile metinler şeffaf olarak sıkıştırılır.
+- **hCaptcha**: Form spam/bot koruması.
+- **NVIDIA NIM (`llama-3.1-nemotron-safety-guard-8b-v3`)**: 23 kategorilik taksonomiyle çalışan içerik güvenliği modeli + yerel Türkçe kara liste filtresi.
+- **Fail-closed moderasyon**: Moderasyon servisine ulaşılamazsa güvenliği sağlamak için dilek reddedilir.
 
-- **Turso (libSQL)**: çoğu ücretsiz PaaS (Render, Railway vb.) diskin kalıcı olmadığı "ephemeral
-  filesystem" modeliyle çalışır — yerel bir SQLite dosyası her deploy/restart'ta silinir. Turso
-  bulutta kalıcı, SQLite uyumlu, ücretsiz katmanı (500 veritabanı, 9GB depolama, ayda 25M okuma)
-  bu sorunu ortadan kaldırır.
-- **hCaptcha**: form spam/bot koruması. Sitekey herkese açık (HTML'e gömülür), secret sadece
-  sunucuda `.env`'de kalır.
-- **NVIDIA NIM (`llama-3.1-nemotron-safety-guard-8b-v3`)**: NVIDIA'nın içerik güvenliği için özel
-  eğittiği, 23 kategorilik bir taksonomi ve yapılandırılmış JSON çıktısı (`User Safety`,
-  `Safety Categories`) ile çalışan bir sınıflandırıcı model. Resmi dil listesinde Türkçe yok
-  (Llama Guard ile aynı durum) ama talimat-takipli bir model olduğu için taksonomiyi sabit tutup
-  dilek metnini Türkçe olarak veriyoruz — canlı testte hem zararsız hem şiddet içeren Türkçe
-  metinleri doğru sınıflandırdı. Bunun öncesinde ücretsiz bir yerel kara liste
-  (`server/wordlist.js`, kaynak:
-  [ooguz/turkce-kufur-karaliste](https://github.com/ooguz/turkce-kufur-karaliste), CC BY-SA 4.0)
-  hızlı ilk filtre olarak çalışır.
-- **Fail-closed moderasyon**: NIM API'ye ulaşılamazsa dilek reddedilir — düşük trafikli bir site
-  için içerik riskini erişilebilirliğe tercih etmek daha güvenli.
+---
 
-## 1) Hesapları aç ve anahtarları al
+## 1) Dağıtım Yöntemleri (Deployment Options)
 
-### Turso (veritabanı) — ücretsiz
-```bash
-curl -sSfL https://get.tur.so/install.sh | bash   # Turso CLI kurulumu
-turso auth login                                  # tarayıcıdan giriş
-turso db create dilek-agaci                       # veritabanını oluştur
-turso db show dilek-agaci --url                   # → TURSO_DATABASE_URL
-turso db tokens create dilek-agaci                # → TURSO_AUTH_TOKEN
-```
-(CLI kullanmak istemezsen [turso.tech](https://turso.tech) üzerinden tarayıcıyla da aynı işlemi
-yapabilirsin — "Create Database" → "Generate Token".)
+### Seçenek A: Cloudflare Pages (Önerilen — 0 ms Cold Start & Sınırsız Statik Trafik)
 
-### hCaptcha (bot/spam koruması) — ücretsiz
-1. [dashboard.hcaptcha.com](https://dashboard.hcaptcha.com) üzerinden ücretsiz hesap aç.
-2. "New Site" ile bir site ekle, domain'i deploy sonrası gerçek adresle güncelleyebilirsin
-   (geçici olarak `localhost` ile başlayabilirsin).
-3. **Site Key**'i `HCAPTCHA_SITE_KEY`, **Secret Key**'i `HCAPTCHA_SECRET` olarak not al.
+1. Bu repoyu GitHub'a push edin.
+2. [Cloudflare Dashboard](https://dash.cloudflare.com) $\rightarrow$ **Compute (Workers & Pages)** $\rightarrow$ **Create Application** $\rightarrow$ **Pages** $\rightarrow$ **Connect to Git** seçin.
+3. Ayarlar:
+   - **Framework Preset**: `None`
+   - **Build output directory**: `public`
+   - **Root directory**: `/`
+4. **Environment Variables** bölümüne değişkenleri ekleyin (`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `NIM_API_KEY`, `NIM_MODEL`, `HCAPTCHA_SITE_KEY`, `HCAPTCHA_SECRET`).
+5. **Save and Deploy** butonuna tıklayın.
 
-### NVIDIA NIM (içerik moderasyonu) — ücretsiz
-1. [build.nvidia.com](https://build.nvidia.com) üzerinden ücretsiz hesap aç.
-2. [`nvidia/llama-3.1-nemotron-safety-guard-8b-v3`](https://build.nvidia.com/nvidia/llama-3.1-nemotron-safety-guard-8b-v3)
-   model sayfasından "Get API Key" ile anahtar üret → `NIM_API_KEY`.
+*(Wrangler CLI ile yerel geliştirme için: `npx wrangler pages dev public`)*
 
-## 2) Ortam değişkenleri
+---
 
-`.env.example` dosyasını kopyala, gerçek değerlerle doldur (yerelde çalıştırmak için) — deploy
-ederken bu değerleri hosting panelinin **Environment Variables** bölümüne aynı isimlerle gireceksin:
-
-```bash
-cp .env.example .env
-```
-
-| Değişken | Açıklama |
-| --- | --- |
-| `TURSO_DATABASE_URL` | Turso veritabanı bağlantı adresi |
-| `TURSO_AUTH_TOKEN` | Turso erişim token'ı |
-| `NIM_API_KEY` | build.nvidia.com API anahtarı |
-| `NIM_MODEL` | Kullanılacak model id (varsayılan yeterli) |
-| `HCAPTCHA_SECRET` | hCaptcha secret key (gizli) |
-| `HCAPTCHA_SITE_KEY` | hCaptcha site key (herkese açık, HTML'e gömülür) |
-| `CORS_ALLOWED_ORIGINS` | Sitenin gerçek adresi (virgülle birden fazla girilebilir) |
-| `PORT` | Sunucu portu (çoğu barındırıcı bunu kendi atar) |
-
-## 3) Yerelde çalıştır
+### Seçenek B: Node.js / Docker / Render
 
 ```bash
 npm install
@@ -81,22 +41,21 @@ npm start
 # http://localhost:3020
 ```
 
-## 4) Ücretsiz deploy (örnek: Render)
+Render, Fly.io veya VPS üzerinde `node server/server.js` komutuyla doğrudan ayağa kaldırabilirsiniz.
 
-1. Bu klasörü bir GitHub reposuna push et.
-2. [render.com](https://render.com) → "New +" → "Web Service" → repoyu bağla.
-3. **Build Command**: `npm install`
-4. **Start Command**: `npm start`
-5. **Instance Type**: Free
-6. **Environment** sekmesinden yukarıdaki tüm değişkenleri gir.
-7. Deploy sonrası verilen `https://<servis-adı>.onrender.com` adresini hCaptcha panelindeki
-   domain listesine ve `CORS_ALLOWED_ORIGINS`'e ekle, yeniden deploy et.
+---
 
-Kod herhangi bir Cloudflare/VDS'e özel bağlama (binding) kullanmadığı için Railway, Fly.io,
-Cyclic gibi diğer Node destekleyen ücretsiz barındırıcılarda da aynı adımlarla çalışır.
+## 2) Ortam Değişkenleri
 
-## 5) Özel domain (opsiyonel, sonra)
+`.env.example` dosyasını kopyalayarak yerel ortamınızı oluşturabilirsiniz:
 
-İstersen barındırıcı tarafında verilen adresi mevcut Cloudflare hesabındaki bir alt alan adına
-(örn. `dilek.dxtl.com.tr`) CNAME ile bağlayabilirsin — bu adım tamamen opsiyonel ve barındırıcı
-seçimine göre değişir.
+| Değişken | Açıklama |
+| --- | --- |
+| `TURSO_DATABASE_URL` | Turso veritabanı bağlantı adresi (`libsql://...`) |
+| `TURSO_AUTH_TOKEN` | Turso erişim token'ı |
+| `NIM_API_KEY` | build.nvidia.com API anahtarı |
+| `NIM_MODEL` | Kullanılacak model (`nvidia/llama-3.1-nemotron-safety-guard-8b-v3`) |
+| `HCAPTCHA_SECRET` | hCaptcha secret key (gizli) |
+| `HCAPTCHA_SITE_KEY` | hCaptcha site key (herkese açık) |
+| `PORT` | Node.js sunucu portu (varsayılan: 3020) |
+
