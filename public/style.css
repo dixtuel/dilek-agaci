@@ -798,6 +798,22 @@ textarea:focus {
   margin-top: -10px;
 }
 
+/* Centered hCaptcha Widget between textarea and submit button */
+.h-captcha,
+#hcaptcha-widget {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 6px auto;
+  min-height: 78px;
+}
+
+.h-captcha > *,
+#hcaptcha-widget > * {
+  margin: 0 auto !important;
+}
+
 .submit-btn {
   width: 100%;
   background: var(--sakura-accent);
