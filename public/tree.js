@@ -118,12 +118,24 @@
   /**
    * Meaningful dynamic tree growth stages based on wish count
    */
+  // Büyüme kademeleri: diğer online wish-tree sitelerinde (Yoko Ono Wish
+  // Tree, Hirshhorn, eyalohana Digital Wishing Tree) bu tür bir "kademeli
+  // büyüme" mekaniği yok — hepsi ya tüm dilekleri direkt gösteriyor ya da
+  // tamamen algoritmik üretiyor, somut bir emsal bulunamadı. Bu yüzden
+  // kendi mantığımızla tasarlandı: ilk dilek(ler) HEMEN belirgin bir
+  // büyüme hissettirsin (ilk ziyaretçi motive olsun), ama tavana (MAX_DEPTH)
+  // çok hızlı ulaşılmasın — ağaç uzun süre "hâlâ büyüyor" hissi versin.
+  // Her kademe bir öncekinden daha fazla dilek gerektirir (yavaşlayan
+  // büyüme eğrisi) — bu, dal uzunluğunun her derinlikte de küçülmesiyle
+  // (childLength *= ~0.75) birleşince ağaç GÖĞE UZAMAK yerine giderek
+  // daha ÇOK DALLANIR/BUDAKLANIR (marjinal yükseklik katkısı azalırken
+  // dal sayısı katlanarak artar).
   function revealDepthForTotal(total) {
-    if (total <= 0) return 4; // Majestic starter tree even with 0 wishes!
-    if (total <= 8) return 5; // Sprouting young branches
-    if (total <= 25) return 6; // Towering crown growth
-    if (total <= 60) return 7; // Grand blossoming canopy
-    return MAX_DEPTH; // Full ancient legendary sakura tree
+    if (total <= 0) return 4; // Görkemli bir başlangıç ağacı, 0 dilekte bile
+    if (total <= 20) return 5;
+    if (total <= 60) return 6;
+    if (total <= 150) return 7;
+    return MAX_DEPTH; // ~150+ dilekte tam olgun, efsanevi ağaç
   }
 
   function anchorsForDepth(revealDepth) {
@@ -266,7 +278,7 @@
   const GOLDEN_ANGLE_RAD = 137.50776405003785 * (Math.PI / 180);
   const anchorUsage = new Map(); // anchorIdx -> bu anchor'a kaç blossom düştü
   const blossomPositions = []; // { x, y } — yerleşmiş tüm blossom'ların gerçek piksel konumu
-  const MIN_BLOSSOM_DIST = 18; // px (900x1000 viewBox) — küçülen çiçek boyutuna orantılı, gerçek sakura dallarındaki gibi sık ama ayrık kümeler
+  const MIN_BLOSSOM_DIST = 24; // px — büyüyen dilek çiçeği boyutuna orantılı, çakışmayı önler
 
   /**
    * Bir wish için gerçekten boş (yakın komşusu olmayan) bir anchor+spiral
@@ -394,15 +406,25 @@
     // sakura ağaçları uzaktan bulut gibi görünür ama bu, binlerce KÜÇÜK
     // AYRI çiçeğin yoğun şekilde üst üste binmesinden kaynaklanır, bulanık
     // blob'lardan değil. Her dal ucuna sıkı, jitter'lı bir "pom-pom" kümesi
-    // halinde 10-16 gerçek mini çiçek yerleştirilir.
+    // halinde mini çiçek yerleştirilir.
+    //
+    // Küme başına çiçek sayısı revealDepth'e göre ÖLÇEKLENİR (sabit değil):
+    // genç ağaç (depth4) seyrek/ince, olgun ağaç (depth8=MAX_DEPTH) çok
+    // yoğun/gür görünsün diye — dal sayısındaki artışla (2.3x/kademe)
+    // birleşince kademeler arası doluluk farkı gerçekten belirgin olur.
+    const DEPTH_FLOWER_BASE = { 4: 4, 5: 7, 6: 11, 7: 15, 8: 20 };
+    const flowerBase = DEPTH_FLOWER_BASE[revealDepth] || 10;
+    const flowerJitterSpan = Math.max(2, Math.round(flowerBase * 0.3));
+    const clusterRadius = 9 + flowerBase * 0.4;
+
     const tipSegments = SEGMENTS.filter((s) => s.depth <= revealDepth && (s.depth === revealDepth || s.isLeaf));
     tipSegments.forEach((s, ti) => {
-      const flowerCount = 10 + (hashId(ti + 500) % 7); // 10-16 çiçek
+      const flowerCount = flowerBase + (hashId(ti + 500) % flowerJitterSpan);
       for (let c = 0; c < flowerCount; c++) {
         const jitterAngle = (hashId(ti * 7 + c + 1) % 360) * (Math.PI / 180);
         // Kümenin merkezine yakın çiçekler daha yoğun (sqrt dağılımı),
         // kenarlara doğru seyrekleşerek yuvarlak/organik bir siluet verir.
-        const jitterR = Math.sqrt((hashId(ti * 11 + c + 2) % 100) / 100) * 15;
+        const jitterR = Math.sqrt((hashId(ti * 11 + c + 2) % 100) / 100) * clusterRadius;
         const cx = s.x2 + Math.cos(jitterAngle) * jitterR;
         const cy = s.y2 + Math.sin(jitterAngle) * jitterR;
         const scale = 0.62 + (hashId(ti * 13 + c + 3) % 45) / 100;
@@ -504,17 +526,16 @@
     g.setAttribute("role", "button");
     g.setAttribute("aria-label", t.wishLabel(wish.name, wish.text));
 
-    // Gerçek sakura dallarındaki gibi küçük, sık kümeler halinde açan çiçekler
-    // (yalnız dal ucunda değil, tüm ağaca yayılan, birbirine daha yakın
-    // durabilen küçük blossomlar) — önceki boyut (26-34px) referans
-    // görsellerdeki yoğun/ince çiçeklenmeye göre fazla büyüktü.
-    const scale = 1.05 + (hashId(wish.id) % 35) / 100;
+    // Gerçek dilekler (tıklanabilir) az sayıda olsa bile ağacın "dolu"
+    // görünmesini sağlayan asıl unsur — dal ucundaki dekoratif mini
+    // çiçeklerden belirgin şekilde daha büyük olmalı.
+    const scale = 1.35 + (hashId(wish.id) % 35) / 100;
     const petalColor = HUE_COLORS[hue] || "#ff5c8d";
 
-    // Görünmez, mobilde dokunmayı kolaylaştıran hitbox — küçülen çiçeğe göre
-    // orantılı küçültüldü ama yine de rahat tıklanabilir kalacak kadar geniş.
+    // Görünmez, mobilde dokunmayı kolaylaştıran hitbox — büyüyen çiçeğe göre
+    // orantılı genişletildi.
     const hitbox = document.createElementNS(SVG_NS, "circle");
-    hitbox.setAttribute("r", 16);
+    hitbox.setAttribute("r", 20);
     hitbox.setAttribute("fill", "transparent");
     g.appendChild(hitbox);
 
