@@ -502,22 +502,48 @@
   let petalAnimationId = null;
   let lastSpawnTime = 0;
 
+  /**
+   * Generates comprehensive, high-precision anchor points across the entire active tree canopy:
+   * 1. All branch end-tips (s.x2, s.y2) up to current depth
+   * 2. All mid-branch foliage points (cubic Bezier curve midpoints)
+   * 3. All currently rendered active blossom centers
+   * This guarantees that whether the tree is young (depth 4) or towering (depth 8),
+   * petals always spawn directly from visible leaves, buds and blossoms.
+   */
+  function getPetalSpawnPoints() {
+    const points = [];
+    const activeSegments = SEGMENTS.filter((s) => s.depth <= currentRevealDepth && s.depth >= 3);
+
+    for (let i = 0; i < activeSegments.length; i++) {
+      const s = activeSegments[i];
+      // Branch tip
+      points.push({ x: s.x2, y: s.y2 });
+
+      // Cubic Bezier midpoint (t = 0.5)
+      const midX = 0.125 * s.x1 + 0.375 * s.cx1 + 0.375 * s.cx2 + 0.125 * s.x2;
+      const midY = 0.125 * s.y1 + 0.375 * s.cy1 + 0.375 * s.cy2 + 0.125 * s.y2;
+      points.push({ x: midX, y: midY });
+    }
+
+    return points;
+  }
+
   function spawnSinglePetal() {
     if (!canvasW || !canvasH) return;
-    const anchors = anchorsForDepth(currentRevealDepth);
-    if (!anchors || anchors.length === 0) return;
+    const spawnPoints = getPetalSpawnPoints();
+    if (!spawnPoints || spawnPoints.length === 0) return;
 
-    // Pick a random branch/blossom node
-    const anchor = anchors[Math.floor(Math.random() * anchors.length)];
+    // Pick a point from canopy foliage or directly from a rendered blossom
+    const point = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
 
     let startX = 0;
     let startY = 0;
 
-    // 100% exact SVG Screen Coordinate Transformation Matrix (accounts for preserveAspectRatio, scaling, letterboxing perfectly!)
+    // 100% exact SVG Screen Coordinate Transformation Matrix
     if (svg.getScreenCTM && svg.createSVGPoint) {
       const pt = svg.createSVGPoint();
-      pt.x = anchor.x;
-      pt.y = anchor.y;
+      pt.x = point.x;
+      pt.y = point.y;
       const screenPt = pt.matrixTransform(svg.getScreenCTM());
       const stageRect = canvas.getBoundingClientRect();
       startX = screenPt.x - stageRect.left;
@@ -525,8 +551,8 @@
     } else {
       const svgRect = svg.getBoundingClientRect();
       const stageRect = canvas.getBoundingClientRect();
-      startX = (svgRect.left - stageRect.left) + (anchor.x / VIEW_W) * svgRect.width;
-      startY = (svgRect.top - stageRect.top) + (anchor.y / VIEW_H) * svgRect.height;
+      startX = (svgRect.left - stageRect.left) + (point.x / VIEW_W) * svgRect.width;
+      startY = (svgRect.top - stageRect.top) + (point.y / VIEW_H) * svgRect.height;
     }
 
     const petal = {
@@ -787,4 +813,18 @@
       submitBtn.textContent = "Ağaca As";
     }
   });
+
+  // Expose TreeEngine debug hooks for testing and inspection
+  window.__TreeEngine = {
+    getPetalSpawnPoints,
+    renderTreeStructure,
+    setRevealDepth: (d) => {
+      currentRevealDepth = d;
+      renderTreeStructure(d);
+    },
+    getAnchors: () => anchorsForDepth(currentRevealDepth),
+    getSegments: () => SEGMENTS,
+    getActivePetals: () => activePetals,
+    spawnSinglePetal,
+  };
 })();
