@@ -404,11 +404,11 @@
   // (kullanıcı geri bildirimi: "ilk hali aşırı boş duruyor", bir sonraki
   // yapısal sıçramaya kadar 20-30 dilek boyunca hiçbir şey değişmiyordu).
   const FLOWER_DENSITY_CURVE = [
-    { t: 0, v: 3 },
-    { t: 20, v: 7 },
-    { t: 60, v: 11 },
-    { t: 150, v: 15 },
-    { t: 400, v: 21 },
+    { t: 0, v: 9 },
+    { t: 20, v: 15 },
+    { t: 60, v: 20 },
+    { t: 150, v: 26 },
+    { t: 400, v: 34 },
   ];
 
   function flowerBaseForTotal(total) {
