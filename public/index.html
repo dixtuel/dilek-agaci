@@ -54,7 +54,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Italianno&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20260823.17" />
+  <link rel="stylesheet" href="/style.css?v=20260823.17" />
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
@@ -105,7 +105,7 @@
 
   <!-- Header -->
   <header class="topbar">
-    <a class="wordmark" href="/">
+    <a class="wordmark" href="/" aria-label="Dilek Ağacı Ana Sayfa">
       <span class="wordmark-icon" aria-hidden="true">
         <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="22" height="22">
           <g transform="translate(12,12)">
@@ -120,19 +120,12 @@
       </span>
       Dilek <span class="wordmark-accent">Ağacı</span>
     </a>
-    <div class="topbar-actions">
-      <div class="lang-switch" role="navigation" aria-label="Dil Seçimi">
-        <a href="/" class="lang-btn active" hreflang="tr" title="Türkçe">TR</a>
-        <span class="lang-sep" aria-hidden="true">/</span>
-        <a href="/en" class="lang-btn" hreflang="en" title="English">EN</a>
-      </div>
-      <button class="cta-btn" id="open-form">
-        <svg class="sparkle-svg" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
-          <path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#FFD1DC"/>
-        </svg>
-        Bir Dilek Bırak
-      </button>
-    </div>
+    <button class="cta-btn" id="open-form" aria-haspopup="dialog" aria-expanded="false">
+      <svg class="sparkle-svg" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+        <path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#FFD1DC"/>
+      </svg>
+      Bir Dilek Bırak
+    </button>
   </header>
 
   <!-- Main stage -->
@@ -207,8 +200,16 @@
     </div>
   </div>
 
-  <!-- Credit -->
-  <a class="credit" href="https://dxtl.com.tr" target="_blank" rel="noopener">made by dixtuel</a>
+  <!-- Floating Bottom Footer Bar (TR / EN + Made by dixtuel) -->
+  <div class="footer-bar">
+    <div class="lang-switch" role="navigation" aria-label="Dil Seçimi">
+      <a href="/" class="lang-btn active" hreflang="tr" title="Türkçe">TR</a>
+      <span class="lang-sep" aria-hidden="true">/</span>
+      <a href="/en" class="lang-btn" hreflang="en" title="English">EN</a>
+    </div>
+    <span class="footer-sep" aria-hidden="true">·</span>
+    <a class="credit" href="https://dxtl.com.tr" target="_blank" rel="noopener">made by dixtuel</a>
+  </div>
 
   <!-- Wish Form Panel -->
   <div class="panel-backdrop" id="panel-backdrop" hidden></div>
@@ -234,12 +235,17 @@
     </form>
 
     <div class="panel-footer">
+      <div class="panel-lang">
+        <a href="/" class="lang-btn active">Türkçe</a>
+        <span class="lang-sep">/</span>
+        <a href="/en" class="lang-btn">English</a>
+      </div>
       <p><a href="terms.html">Şartlar &amp; Gizlilik</a></p>
       <span class="panel-credit"><a href="https://dxtl.com.tr" target="_blank" rel="noopener">made by dixtuel</a></span>
     </div>
   </aside>
 
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-  <script src="tree.js?v=20260823.17"></script>
+  <script src="/tree.js?v=20260823.17"></script>
 </body>
 </html>

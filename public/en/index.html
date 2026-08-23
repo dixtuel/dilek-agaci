@@ -54,74 +54,78 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Italianno&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=20260823.17" />
+  <link rel="stylesheet" href="/style.css?v=20260823.17" />
 
   <!-- Schema.org Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "CreativeWork",
+    "@type": "WebApplication",
     "name": "Wish Tree",
-    "alternateName": "Dilek Ağacı",
-    "description": "A tranquil, shared digital wish tree where hopes from around the world gather and blossom under the starry twilight sky.",
+    "description": "Make a wish and watch a cherry blossom bloom. A tranquil, shared digital wish tree where hopes from around the world gather under the starry twilight sky.",
     "url": "https://dilekagaci.dxtl.com.tr/en",
+    "applicationCategory": "SocialNetworkingApplication",
+    "operatingSystem": "Web",
     "inLanguage": "en",
     "author": {
       "@type": "Person",
-      "name": "Asrın Kılıç (dixtuel)",
+      "name": "dixtuel",
       "url": "https://dxtl.com.tr"
     }
   }
   </script>
 </head>
 <body>
-  <!-- Deep starry sky atmosphere -->
-  <div class="sky" aria-hidden="true">
-    <div class="sky-stars"></div>
-    <div class="sky-particles"></div>
-    <div class="sky-moon">
-      <div class="moon-crater c1"></div>
-      <div class="moon-crater c2"></div>
-      <div class="moon-crater c3"></div>
+  <!-- Atmospheric Night Sky (Moon, Clouds, Stars, Shooting Star) -->
+  <div class="sky" id="sky" aria-hidden="true">
+    <div class="stars-layer stars-1"></div>
+    <div class="stars-layer stars-2"></div>
+    <div class="stars-layer stars-3"></div>
+
+    <div class="shooting-star"></div>
+
+    <div class="moon-wrap">
+      <div class="moon-halo"></div>
+      <div class="moon">
+        <div class="moon-crater c1"></div>
+        <div class="moon-crater c2"></div>
+        <div class="moon-crater c3"></div>
+      </div>
     </div>
+
     <div class="clouds-wrap">
       <div class="cloud cloud-1"></div>
       <div class="cloud cloud-2"></div>
       <div class="cloud cloud-3"></div>
+      <div class="cloud cloud-4"></div>
     </div>
-    <div class="fireflies" id="fireflies"></div>
+
+    <div class="sky-particles"></div>
   </div>
 
   <!-- Header -->
   <header class="topbar">
-    <a href="/en" class="wordmark" aria-label="Wish Tree Home">
+    <a class="wordmark" href="/en" aria-label="Wish Tree Home">
       <span class="wordmark-icon" aria-hidden="true">
         <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="22" height="22">
           <g transform="translate(12,12)">
-            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/>
-            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/>
-            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(144)"/>
-            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(216)"/>
-            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(288)"/>
-            <circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#FCAEB8" transform="rotate(0)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#FFD1DC" transform="rotate(72)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#FCAEB8" transform="rotate(144)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#FFD1DC" transform="rotate(216)"/>
+            <ellipse cx="0" cy="-6" rx="3.4" ry="5.5" fill="#FCAEB8" transform="rotate(288)"/>
+            <circle cx="0" cy="0" r="2.8" fill="#FFF2F5"/>
           </g>
         </svg>
       </span>
       Wish <span class="wordmark-accent">Tree</span>
     </a>
-    <div class="topbar-actions">
-      <div class="lang-switch" role="navigation" aria-label="Language selection">
-        <a href="/" class="lang-btn" hreflang="tr" title="Türkçe">TR</a>
-        <span class="lang-sep" aria-hidden="true">/</span>
-        <a href="/en" class="lang-btn active" hreflang="en" title="English">EN</a>
-      </div>
-      <button class="cta-btn" id="open-form" aria-haspopup="dialog" aria-expanded="false">
-        <svg class="sparkle-svg" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
-          <path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#FFD1DC"/>
-        </svg>
-        Make a Wish
-      </button>
-    </div>
+    <button class="cta-btn" id="open-form" aria-haspopup="dialog" aria-expanded="false">
+      <svg class="sparkle-svg" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+        <path d="M8 0L9.5 5.5L15 7L9.5 8.5L8 14L6.5 8.5L1 7L6.5 5.5Z" fill="#FFD1DC"/>
+      </svg>
+      Make a Wish
+    </button>
   </header>
 
   <!-- Main stage -->
@@ -142,11 +146,42 @@
     </div>
 
     <!-- Sky wishes (ascending stars container) -->
-    <div class="sky-wishes" id="sky-wishes" aria-label="Stars in the sky"></div>
+    <div class="sky-wishes" id="sky-wishes"></div>
 
-    <!-- Counter -->
-    <div class="counter-pill" id="counter" aria-live="polite">
-      <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+    <!-- Organic Grass & Terrain Mound -->
+    <div class="ground-terrain">
+      <svg viewBox="0 0 1200 140" preserveAspectRatio="none" class="ground-svg" aria-hidden="true">
+        <path d="M 0,80 Q 300,20 600,45 T 1200,60 L 1200,140 L 0,140 Z" fill="#8E829B" opacity="0.85"></path>
+        <path d="M 0,95 Q 350,35 600,50 T 1200,75 L 1200,140 L 0,140 Z" fill="#AEA4B9"></path>
+        <ellipse cx="540" cy="85" rx="5" ry="2.5" fill="#FCAEB8" opacity="0.8" transform="rotate(-15 540 85)"></ellipse>
+        <ellipse cx="660" cy="90" rx="4" ry="2" fill="#FFD1DC" opacity="0.75" transform="rotate(25 660 90)"></ellipse>
+        <ellipse cx="480" cy="92" rx="4.5" ry="2.2" fill="#FCAEB8" opacity="0.75" transform="rotate(10 480 92)"></ellipse>
+        <ellipse cx="720" cy="100" rx="3.5" ry="1.8" fill="#FFF2F5" opacity="0.7" transform="rotate(-30 720 100)"></ellipse>
+      </svg>
+
+      <!-- Counter Pill sits prominently above the hill ground -->
+      <div class="counter-pill" id="counter" aria-live="polite">
+        <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="17" height="17">
+          <g transform="translate(12,12)">
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(144)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(216)"/>
+            <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(288)"/>
+            <circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/>
+          </g>
+        </svg>
+        <span>the tree is quiet, be the first to leave a wish</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Wish Card Modal / Dialog -->
+  <div class="wish-card-backdrop" id="wish-card-backdrop" hidden></div>
+  <div class="wish-card-dialog" id="wish-card-dialog" role="dialog" aria-modal="true" hidden>
+    <button class="wish-card-close" id="wish-card-close" aria-label="Close wish card">✕</button>
+    <div class="wish-card-tag">
+      <svg class="mini-blossom-svg" viewBox="0 0 24 24" width="16" height="16">
         <g transform="translate(12,12)">
           <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FCAEB8" transform="rotate(0)"/>
           <ellipse cx="0" cy="-5" rx="3" ry="4.5" fill="#FFD1DC" transform="rotate(72)"/>
@@ -156,53 +191,37 @@
           <circle cx="0" cy="0" r="2.2" fill="#FFF2F5"/>
         </g>
       </svg>
-      <span>loading tree…</span>
+      A Wish
     </div>
-
-    <!-- Ground silhouette -->
-    <div class="ground-terrain" aria-hidden="true">
-      <svg class="ground-svg" viewBox="0 0 1440 120" preserveAspectRatio="none">
-        <path d="M0,75 C320,30 680,20 1000,45 C1240,65 1380,85 1440,95 L1440,120 L0,120 Z" fill="#8E829B" opacity="0.65" />
-        <path d="M0,90 C360,45 740,35 1100,60 C1280,75 1400,90 1440,105 L1440,120 L0,120 Z" fill="#AEA4B9" />
-      </svg>
-    </div>
-  </main>
-
-  <!-- Desktop Bottom Right Credit -->
-  <div class="credit">
-    <a href="https://dxtl.com.tr" target="_blank" rel="noopener" aria-label="Author portfolio">made by dixtuel</a>
-  </div>
-
-  <!-- Wish Card Modal Dialog -->
-  <div class="wish-card-backdrop" id="wish-card-backdrop" hidden></div>
-  <div class="wish-card-dialog" id="wish-card-dialog" role="dialog" aria-modal="true" aria-labelledby="wish-card-title" hidden>
-    <div class="wish-card-content">
-      <div class="wish-card-header">
-        <span class="wish-card-badge" id="wish-card-title">🌸 A Wish</span>
-        <button type="button" class="wish-card-close" id="wish-card-close" aria-label="Close wish card">✕</button>
-      </div>
-      <p class="wish-card-text" id="wish-card-text"></p>
-      <div class="wish-card-footer">
-        <span class="wish-card-who" id="wish-card-who"></span>
-        <span class="wish-card-when" id="wish-card-when"></span>
-      </div>
+    <p class="wish-card-text" id="wish-card-text"></p>
+    <div class="wish-card-meta">
+      <span class="wish-card-who" id="wish-card-who"></span>
+      <span class="wish-card-when" id="wish-card-when"></span>
     </div>
   </div>
 
-  <!-- Panel: make a wish form -->
+  <!-- Floating Bottom Footer Bar (TR / EN + Made by dixtuel) -->
+  <div class="footer-bar">
+    <div class="lang-switch" role="navigation" aria-label="Language selection">
+      <a href="/" class="lang-btn" hreflang="tr" title="Türkçe">TR</a>
+      <span class="lang-sep" aria-hidden="true">/</span>
+      <a href="/en" class="lang-btn active" hreflang="en" title="English">EN</a>
+    </div>
+    <span class="footer-sep" aria-hidden="true">·</span>
+    <a class="credit" href="https://dxtl.com.tr" target="_blank" rel="noopener">made by dixtuel</a>
+  </div>
+
+  <!-- Wish Form Panel -->
   <div class="panel-backdrop" id="panel-backdrop" hidden></div>
-  <aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
+  <aside class="panel" id="panel" hidden aria-labelledby="panel-title">
     <div class="panel-handle" aria-hidden="true"></div>
-    <div class="panel-header">
-      <h2 id="panel-title">Make a Wish</h2>
-      <button type="button" class="panel-close" id="panel-close" aria-label="Close panel">✕</button>
-    </div>
-
+    <button class="panel-close" id="panel-close" aria-label="Close panel">✕</button>
+    <h2 id="panel-title">Make a Wish</h2>
     <p class="panel-hint">Your wish will bloom as a fresh cherry blossom on the tree. Everyone can read it, so please be kind.</p>
 
     <form id="wish-form" novalidate>
-      <label for="name">Your Name (optional)</label>
-      <input type="text" id="name" name="name" maxlength="40" placeholder="Anonymous, or your nickname…" autocomplete="off" />
+      <label for="name">Your Name <span>(optional)</span></label>
+      <input id="name" name="name" type="text" maxlength="40" autocomplete="off" placeholder="Anonymous, or your nickname…" />
 
       <label for="text">Your Wish</label>
       <textarea id="text" name="text" maxlength="220" rows="4" required placeholder="Write what is in your heart…"></textarea>
@@ -216,12 +235,17 @@
     </form>
 
     <div class="panel-footer">
+      <div class="panel-lang">
+        <a href="/" class="lang-btn">Türkçe</a>
+        <span class="lang-sep">/</span>
+        <a href="/en" class="lang-btn active">English</a>
+      </div>
       <p><a href="terms.html">Terms &amp; Privacy</a></p>
       <span class="panel-credit"><a href="https://dxtl.com.tr" target="_blank" rel="noopener">made by dixtuel</a></span>
     </div>
   </aside>
 
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
-  <script src="../tree.js?v=20260823.17"></script>
+  <script src="/tree.js?v=20260823.17"></script>
 </body>
 </html>

@@ -347,60 +347,6 @@ button {
   -webkit-text-fill-color: transparent;
 }
 
-/* Topbar Actions & Language Switcher */
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: clamp(8px, 1.8vw, 14px);
-}
-
-.lang-switch {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35em 0.75em;
-  background: var(--btn-glass);
-  border: 1px solid var(--btn-glass-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 999px;
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  gap: 3px;
-  box-shadow: 0 4px 16px rgba(45, 40, 65, 0.2);
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.lang-switch:hover {
-  border-color: rgba(252, 174, 184, 0.35);
-}
-
-.lang-btn {
-  color: var(--ink-faint);
-  text-decoration: none;
-  padding: 2px 5px;
-  border-radius: 6px;
-  transition: color 0.2s ease, text-shadow 0.2s ease;
-  line-height: 1;
-}
-
-.lang-btn:hover {
-  color: var(--ink);
-}
-
-.lang-btn.active {
-  color: var(--sakura-main);
-  text-shadow: 0 0 10px rgba(252, 174, 184, 0.45);
-}
-
-.lang-sep {
-  color: var(--ink-faint);
-  opacity: 0.35;
-  font-size: 0.72rem;
-  user-select: none;
-}
-
 /* Solid Glass Buttons */
 .cta-btn {
   background: var(--btn-glass);
@@ -424,7 +370,102 @@ button {
   background: var(--btn-glass-hover);
   border-color: var(--sakura-main);
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(120, 118, 148, 0.45);
+  box-shadow: 0 6px 20px rgba(252, 174, 184, 0.35);
+}
+
+.cta-btn:active {
+  transform: translateY(0);
+}
+
+/* Floating Bottom Footer Bar (Language switch + Signature) */
+.footer-bar {
+  position: fixed;
+  bottom: 14px;
+  right: 18px;
+  z-index: 15;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--btn-glass);
+  border: 1px solid var(--btn-glass-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 5px 14px;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(45, 40, 65, 0.25);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.footer-bar:hover {
+  border-color: rgba(252, 174, 184, 0.4);
+}
+
+.footer-bar .credit {
+  position: static;
+  font-family: var(--font-cursive);
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--ink-light);
+  transform: translateY(-1px);
+}
+
+.footer-sep {
+  color: var(--ink-faint);
+  opacity: 0.35;
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  gap: 2px;
+}
+
+.lang-btn {
+  color: var(--ink-faint);
+  text-decoration: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+  line-height: 1;
+}
+
+.lang-btn:hover {
+  color: var(--ink);
+}
+
+.lang-btn.active {
+  color: var(--sakura-main);
+  text-shadow: 0 0 10px rgba(252, 174, 184, 0.45);
+}
+
+.lang-sep {
+  color: var(--ink-faint);
+  opacity: 0.35;
+  font-size: 0.72rem;
+  user-select: none;
+}
+
+.panel-lang {
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.panel-lang .lang-btn {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.panel-lang .lang-btn.active {
+  background: rgba(252, 174, 184, 0.2);
+  color: var(--sakura-main);
 }
 
 .sparkle-svg {
@@ -1003,18 +1044,25 @@ textarea:focus {
     padding: 10px 14px;
   }
 
-  .topbar-actions {
-    gap: 8px;
+  .cta-btn {
+    padding: 0.55em 1.1em;
+    font-size: 0.85rem;
   }
 
-  .cta-btn {
-    padding: 0.55em 1em;
-    font-size: 0.84rem;
+  .footer-bar {
+    bottom: 8px;
+    right: 12px;
+    padding: 3px 10px;
+    gap: 6px;
+    background: rgba(78, 68, 95, 0.6);
+  }
+
+  .footer-bar .credit {
+    font-size: 1.15rem;
   }
 
   .lang-switch {
-    padding: 0.3em 0.6em;
-    font-size: 0.76rem;
+    font-size: 0.72rem;
   }
 
   .stage {
@@ -1040,11 +1088,6 @@ textarea:focus {
     font-size: 0.76rem;
     margin-bottom: 16px;
     padding: 0.46em 1.1em;
-  }
-
-  /* Hide bottom credit on mobile main screen to keep canvas completely clean */
-  .credit {
-    display: none;
   }
 
   .panel {
