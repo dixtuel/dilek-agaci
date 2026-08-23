@@ -1,8 +1,13 @@
 # Dilek Ağacı
 
+[![Siteyi ziyaret et](https://img.shields.io/badge/dilekagaci.onrender.com-canlı_site-e8785a?style=for-the-badge&logo=googlechrome&logoColor=white)](https://dilekagaci.onrender.com)
+
 Herkesin ortak gördüğü, dilek yazıldıkça çiçek açan bir dilek ağacı sitesi. Tek bir Node.js
 servisi hem statik önyüzü hem de API'yi sunar; veritabanı Turso (bulut tabanlı, SQLite uyumlu)
 olduğu için hangi ücretsiz Node barındırıcısına deploy edersen et veri kaybolmaz.
+
+> Ücretsiz planda barındığı için site birkaç dakika boyunca istek almazsa uyur; ilk açılış
+> isteği birkaç saniye gecikebilir, bu normaldir.
 
 ## Mimari — neden bu seçimler
 
