@@ -12,13 +12,16 @@
   const SEED = 20260823;
   const MAX_VISIBLE_BLOSSOMS = 150;
 
-  // Sakura blossom palette (Pastel Sakura, Pudra Pembe, Gül Kurusu, İpeksi Krem)
+  // Dilek çiçekleri: dallardaki dekoratif yaprak/tomurcuklarla (--sakura-*,
+  // style.css) AYNI paletin belirgin şekilde KOYU tonları — böylece asıl
+  // dilekler arka plan dokusuna karışmadan öne çıkıyor, tıklanabilir olduğu
+  // görsel olarak da belli oluyor.
   const HUES = ["sakura", "pale", "accent", "cream"];
   const HUE_COLORS = {
-    sakura: "#FCAEB8",
-    pale: "#FFD1DC",
-    accent: "#EB8298",
-    cream: "#FFF2F5"
+    sakura: "#E24A72",
+    pale: "#D66C8E",
+    accent: "#B03159",
+    cream: "#C97C93"
   };
 
   /**
@@ -281,6 +284,27 @@
   /**
    * Render roots, branches, and delicate branch leaves up to current reveal depth
    */
+  // Kalın gövde/kök/dallara ince, koyu, hafif kaydırılmış paralel bir
+  // "kabuk oluğu" ekler — ağaç büyütüldükten sonra düz tek renkli gövde çok
+  // yalın kalıyordu, bu doku onu kırar. Yalnız yeterince kalın segmentlerde
+  // (ince dallarda gürültü yaratmaması için).
+  function addBarkRidge(layer, seg, width) {
+    if (width < 6) return;
+    const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+    const len = Math.hypot(dx, dy) || 1;
+    const dist = width * 0.2;
+    const ox = (-dy / len) * dist;
+    const oy = (dx / len) * dist;
+    const ridge = document.createElementNS(SVG_NS, "path");
+    ridge.setAttribute(
+      "d",
+      `M ${seg.x1 + ox},${seg.y1 + oy} C ${seg.cx1 + ox},${seg.cy1 + oy} ${seg.cx2 + ox},${seg.cy2 + oy} ${seg.x2 + ox},${seg.y2 + oy}`
+    );
+    ridge.setAttribute("class", "bark-ridge");
+    ridge.setAttribute("stroke-width", Math.max(1, width * 0.09));
+    layer.appendChild(ridge);
+  }
+
   function renderTreeStructure(revealDepth) {
     // 1. Render roots
     rootLayer.innerHTML = "";
@@ -292,6 +316,7 @@
       path.setAttribute("class", "branch");
       path.setAttribute("fill", "none");
       rootLayer.appendChild(path);
+      addBarkRidge(rootLayer, r, r.width);
     });
 
     // 2. Render branches
@@ -304,43 +329,48 @@
       path.setAttribute("class", "branch");
       path.setAttribute("fill", "none");
       branchLayer.appendChild(path);
+      addBarkRidge(branchLayer, s, s.width);
     });
 
     // 3. Render delicate organic sakura leaves and blossom buds along branches
+    // Ağaç büyütüldükten sonra önceki yoğunluk çok seyrek/boş kalıyordu —
+    // daha alçak derinliklerden başlayan, segment başına daha fazla ve daha
+    // iyi dağılmış yaprak/tomurcuk ile daha dolgun, gerçek bir sakura
+    // kanopisi görünümü hedeflendi.
     leafLayer.innerHTML = "";
-    const activeSegments = SEGMENTS.filter((s) => s.depth >= 3 && s.depth <= revealDepth);
+    const activeSegments = SEGMENTS.filter((s) => s.depth >= 2 && s.depth <= revealDepth);
     activeSegments.forEach((s, idx) => {
       const angle = Math.atan2(s.y2 - s.y1, s.x2 - s.x1);
       const angleDeg = (angle * 180) / Math.PI;
 
-      // Mid-branch delicate leaf pair
-      const midX = (s.x1 + s.x2) / 2;
-      const midY = (s.y1 + s.y2) / 2;
-
-      // Leaf 1
-      const leaf1 = document.createElementNS(SVG_NS, "ellipse");
-      leaf1.setAttribute("cx", midX);
-      leaf1.setAttribute("cy", midY);
-      leaf1.setAttribute("rx", 6.5);
-      leaf1.setAttribute("ry", 3.2);
-      leaf1.setAttribute("class", idx % 2 === 0 ? "tree-leaf" : "tree-leaf-alt");
-      leaf1.setAttribute("transform", `rotate(${angleDeg + 35} ${midX} ${midY})`);
-      leafLayer.appendChild(leaf1);
-
-      // Leaf 2 (opposite side)
-      if (s.depth >= 4 && idx % 3 !== 0) {
-        const leaf2 = document.createElementNS(SVG_NS, "ellipse");
-        leaf2.setAttribute("cx", midX);
-        leaf2.setAttribute("cy", midY);
-        leaf2.setAttribute("rx", 5.5);
-        leaf2.setAttribute("ry", 2.8);
-        leaf2.setAttribute("class", "tree-leaf-alt");
-        leaf2.setAttribute("transform", `rotate(${angleDeg - 40} ${midX} ${midY})`);
-        leafLayer.appendChild(leaf2);
+      function leafAt(t, rx, ry, rotOffset, cls) {
+        const lx = s.x1 + (s.x2 - s.x1) * t;
+        const ly = s.y1 + (s.y2 - s.y1) * t;
+        const leaf = document.createElementNS(SVG_NS, "ellipse");
+        leaf.setAttribute("cx", lx);
+        leaf.setAttribute("cy", ly);
+        leaf.setAttribute("rx", rx);
+        leaf.setAttribute("ry", ry);
+        leaf.setAttribute("class", cls);
+        leaf.setAttribute("transform", `rotate(${angleDeg + rotOffset} ${lx} ${ly})`);
+        leafLayer.appendChild(leaf);
       }
 
-      // Small blossom bud at branch junctions
-      if (s.depth >= 4 && (idx % 2 === 0 || s.isLeaf)) {
+      // Dal boyunca 2-4 nokta: gövdeye yakın (depth 2-3) daha seyrek, dal
+      // uçlarına (depth 4+) doğru daha sık ve dolgun.
+      leafAt(0.5, 6.8, 3.3, 35, idx % 2 === 0 ? "tree-leaf" : "tree-leaf-alt");
+      leafAt(0.5, 5.8, 2.9, -40, "tree-leaf-alt");
+
+      if (s.depth >= 3) {
+        leafAt(0.22, 5.2, 2.6, 50, "tree-leaf");
+      }
+      if (s.depth >= 4) {
+        leafAt(0.78, 5.6, 2.7, -55, idx % 2 === 0 ? "tree-leaf-alt" : "tree-leaf");
+      }
+
+      // Small blossom bud at branch junctions — artık daha erken derinlikten
+      // ve daha sık başlıyor.
+      if (s.depth >= 3 && (idx % 2 === 0 || s.isLeaf)) {
         const bud = document.createElementNS(SVG_NS, "circle");
         bud.setAttribute("cx", s.x2);
         bud.setAttribute("cy", s.y2);

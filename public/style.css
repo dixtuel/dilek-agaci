@@ -532,6 +532,16 @@ button {
   stroke-linejoin: round;
 }
 
+/* Kalın gövde/dallarda ince kabuk dokusu çizgisi — ağaç büyütüldükten sonra
+   düz tek renkli gövde çok yalın kalıyordu, bu ince koyu çizgiler kabuk
+   girinti/oluk hissi verir. */
+.bark-ridge {
+  fill: none;
+  stroke: #5A4652;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+
 /* Delicate Sakura Leaves & Blossom Buds on branches */
 .tree-leaf {
   fill: var(--sakura-main);
