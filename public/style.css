@@ -537,22 +537,24 @@ button {
    girinti/oluk hissi verir. */
 .bark-ridge {
   fill: none;
-  stroke: #5A4652;
+  stroke: #241B19;
   stroke-linecap: round;
-  opacity: 0.35;
-}
-
-/* Yaprak "bulutları" — dal uçlarında yumuşak, düşük opaklıklı kümeler;
-   az dallı genç bir ağaçta bile hacim/dolgunluk hissi verir. İnce
-   yaprak/tomurcuk katmanının ALTINDA durur. */
-.tree-foliage-cloud {
-  fill: var(--sakura-pale);
   opacity: 0.4;
 }
 
-.tree-foliage-cloud-alt {
-  fill: var(--sakura-main);
-  opacity: 0.32;
+/* Gerçek kiraz/sakura kabuğunun ayırt edici özelliği: yatay lentisel
+   (nefes alma) çizgileri — kalın gövde/dallarda ince, açık tonlu
+   yatay tireler. */
+.bark-lenticel {
+  stroke: #B89178;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+/* Dal uçlarındaki gerçek mini-sakura çiçeği kümeleri (bkz. tree.js,
+   mini-sakura-symbol + <use>) — bulanık/opak leke denemesinin yerini aldı. */
+.mini-sakura-fill {
+  pointer-events: none;
 }
 
 /* Delicate Sakura Leaves & Blossom Buds on branches */

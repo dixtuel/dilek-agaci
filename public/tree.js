@@ -232,6 +232,23 @@
   svg.appendChild(leafLayer);
   svg.appendChild(blossomLayer);
 
+  // Kanopi dolgusu için gerçek, küçük 5 yapraklı sakura çiçeği sembolü —
+  // önceki bulanık/opak "leke" denemesi gerçek bir çiçeğe benzemiyordu.
+  // Bu sembol MINI_BLOSSOM_SVG ile aynı, kanıtlanmış geometriyi kullanır;
+  // <use> ile binlerce kez ucuza (tek element/kopya) tekrarlanabilir.
+  const defs = svg.querySelector("defs") || svg.appendChild(document.createElementNS(SVG_NS, "defs"));
+  const miniSymbol = document.createElementNS(SVG_NS, "symbol");
+  miniSymbol.setAttribute("id", "mini-sakura-symbol");
+  miniSymbol.setAttribute("viewBox", "-8 -8 16 16");
+  miniSymbol.innerHTML =
+    '<ellipse cx="0" cy="-3.2" rx="2.1" ry="3.1" fill="#FCAEB8" transform="rotate(0)"/>' +
+    '<ellipse cx="0" cy="-3.2" rx="2.1" ry="3.1" fill="#FFD1DC" transform="rotate(72)"/>' +
+    '<ellipse cx="0" cy="-3.2" rx="2.1" ry="3.1" fill="#FCAEB8" transform="rotate(144)"/>' +
+    '<ellipse cx="0" cy="-3.2" rx="2.1" ry="3.1" fill="#FFD1DC" transform="rotate(216)"/>' +
+    '<ellipse cx="0" cy="-3.2" rx="2.1" ry="3.1" fill="#FCAEB8" transform="rotate(288)"/>' +
+    '<circle cx="0" cy="0" r="1.5" fill="#FFF2F5"/>';
+  defs.appendChild(miniSymbol);
+
   const skyWishes = document.getElementById("sky-wishes");
 
   let currentRevealDepth = 4;
@@ -305,10 +322,40 @@
     layer.appendChild(ridge);
   }
 
+  // Gerçek kiraz ağacı kabuğunun karakteristik yatay lentisel çizgileri —
+  // kalın gövde/dallar boyunca birkaç kısa, açık tonlu yatay tire.
+  function addBarkLenticels(layer, seg, width, seed) {
+    if (width < 8) return;
+    const dx = seg.x2 - seg.x1, dy = seg.y2 - seg.y1;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const perpX = -uy, perpY = ux;
+    const count = Math.min(5, Math.floor(width / 6));
+    for (let i = 0; i < count; i++) {
+      const t = 0.15 + (i / count) * 0.7 + (hashId(seed + i) % 10) / 100;
+      const px = seg.x1 + dx * t;
+      const py = seg.y1 + dy * t;
+      const half = width * 0.24;
+      const wobble = (hashId(seed + i * 3) % 10) / 10 - 0.5;
+      const x1 = px + perpX * half + ux * wobble * 3;
+      const y1 = py + perpY * half + uy * wobble * 3;
+      const x2 = px - perpX * half - ux * wobble * 3;
+      const y2 = py - perpY * half - uy * wobble * 3;
+      const mark = document.createElementNS(SVG_NS, "line");
+      mark.setAttribute("x1", x1);
+      mark.setAttribute("y1", y1);
+      mark.setAttribute("x2", x2);
+      mark.setAttribute("y2", y2);
+      mark.setAttribute("class", "bark-lenticel");
+      mark.setAttribute("stroke-width", Math.max(0.8, width * 0.045));
+      layer.appendChild(mark);
+    }
+  }
+
   function renderTreeStructure(revealDepth) {
     // 1. Render roots
     rootLayer.innerHTML = "";
-    ROOTS.forEach((r) => {
+    ROOTS.forEach((r, ri) => {
       const path = document.createElementNS(SVG_NS, "path");
       path.setAttribute("d", `M ${r.x1},${r.y1} C ${r.cx1},${r.cy1} ${r.cx2},${r.cy2} ${r.x2},${r.y2}`);
       path.setAttribute("stroke", "url(#bark-grad)");
@@ -317,11 +364,12 @@
       path.setAttribute("fill", "none");
       rootLayer.appendChild(path);
       addBarkRidge(rootLayer, r, r.width);
+      addBarkLenticels(rootLayer, r, r.width, ri * 31 + 7);
     });
 
     // 2. Render branches
     branchLayer.innerHTML = "";
-    SEGMENTS.filter((s) => s.depth <= revealDepth).forEach((s) => {
+    SEGMENTS.filter((s) => s.depth <= revealDepth).forEach((s, si) => {
       const path = document.createElementNS(SVG_NS, "path");
       path.setAttribute("d", `M ${s.x1},${s.y1} C ${s.cx1},${s.cy1} ${s.cx2},${s.cy2} ${s.x2},${s.y2}`);
       path.setAttribute("stroke", "url(#bark-grad)");
@@ -330,6 +378,7 @@
       path.setAttribute("fill", "none");
       branchLayer.appendChild(path);
       addBarkRidge(branchLayer, s, s.width);
+      addBarkLenticels(branchLayer, s, s.width, si * 31 + 7);
     });
 
     // 3. Render delicate organic sakura leaves and blossom buds along branches
@@ -339,32 +388,32 @@
     // kanopisi görünümü hedeflendi.
     leafLayer.innerHTML = "";
 
-    // 3a. Yaprak "bulutları" (cloud/cluster) — gerçek prosedürel ağaç
-    // render tekniklerinde yapraklar dal sayısına birebir bağlı tek tek
-    // değil, dal uçlarında yumuşak kümeler halinde çizilir; böylece az
-    // dallı genç bir ağaç bile dolgun görünür (bkz. araştırma: "leaves
-    // clustered into clouds of cells faithful to branching structure").
-    // Bu katman, alttaki hacmi verir; üstüne binen ince yaprak/tomurcuklar
-    // dokuyu tamamlar.
+    // 3a. Dal uçlarında GERÇEK küçük sakura çiçeği kümeleri (mini-sakura
+    // sembolü, <use> ile). Önceki bulanık/yarı saydam "leke" denemesi hiç
+    // çiçeğe benzemiyordu ve kalitesizdi — gerçek referans fotoğraflardaki
+    // sakura ağaçları uzaktan bulut gibi görünür ama bu, binlerce KÜÇÜK
+    // AYRI çiçeğin yoğun şekilde üst üste binmesinden kaynaklanır, bulanık
+    // blob'lardan değil. Her dal ucuna sıkı, jitter'lı bir "pom-pom" kümesi
+    // halinde 10-16 gerçek mini çiçek yerleştirilir.
     const tipSegments = SEGMENTS.filter((s) => s.depth <= revealDepth && (s.depth === revealDepth || s.isLeaf));
     tipSegments.forEach((s, ti) => {
-      const cloudCount = 3 + (hashId(ti + 500) % 2); // 3-4 leke
-      for (let c = 0; c < cloudCount; c++) {
+      const flowerCount = 10 + (hashId(ti + 500) % 7); // 10-16 çiçek
+      for (let c = 0; c < flowerCount; c++) {
         const jitterAngle = (hashId(ti * 7 + c + 1) % 360) * (Math.PI / 180);
-        const jitterR = 4 + (hashId(ti * 11 + c + 2) % 10);
+        // Kümenin merkezine yakın çiçekler daha yoğun (sqrt dağılımı),
+        // kenarlara doğru seyrekleşerek yuvarlak/organik bir siluet verir.
+        const jitterR = Math.sqrt((hashId(ti * 11 + c + 2) % 100) / 100) * 15;
         const cx = s.x2 + Math.cos(jitterAngle) * jitterR;
         const cy = s.y2 + Math.sin(jitterAngle) * jitterR;
-        const r = 11 + (hashId(ti * 13 + c + 3) % 8);
-        const cloud = document.createElementNS(SVG_NS, "ellipse");
-        cloud.setAttribute("cx", cx);
-        cloud.setAttribute("cy", cy);
-        cloud.setAttribute("rx", r);
-        cloud.setAttribute("ry", r * (0.75 + (hashId(ti * 17 + c) % 20) / 100));
-        cloud.setAttribute(
-          "class",
-          hashId(ti * 19 + c) % 2 === 0 ? "tree-foliage-cloud" : "tree-foliage-cloud-alt"
-        );
-        leafLayer.appendChild(cloud);
+        const scale = 0.62 + (hashId(ti * 13 + c + 3) % 45) / 100;
+        const rot = hashId(ti * 17 + c + 4) % 360;
+        const flower = document.createElementNS(SVG_NS, "use");
+        flower.setAttribute("href", "#mini-sakura-symbol");
+        flower.setAttribute("width", 16);
+        flower.setAttribute("height", 16);
+        flower.setAttribute("transform", `translate(${cx} ${cy}) scale(${scale.toFixed(2)}) rotate(${rot})`);
+        flower.setAttribute("class", "mini-sakura-fill");
+        leafLayer.appendChild(flower);
       }
     });
 
