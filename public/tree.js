@@ -809,11 +809,9 @@
 
   let canvasW = 0;
   let canvasH = 0;
-  // Çim çizgisinin canvas'ın ALT KENARINDAN gerçek uzaklığı (px) — sabit bir
-  // değer (ör. 35px) varsaymak yerine .ground-svg'nin gerçek DOM konumundan
-  // ölçülür. Mobilde zeminin altında sayaç pill'i de olduğundan çim çizgisi
-  // canvas'ın alt kenarından çok daha yukarıda kalıyor; sabit varsayım
-  // yaprakların havada asılı kalmasına neden oluyordu.
+  // Çim çizgisinin canvas'ın ALT KENARINDAN gerçek uzaklığı (px) — .ground-svg'nin
+  // gerçek DOM konumundan ölçülür. Mobilde ve masaüstünde ground-svg yüksekliği
+  // farklı (85px vs 110px) olduğundan dinamik ölçüm kritik.
   let groundOffsetFromBottom = 35;
 
   function resizePetalCanvas() {
@@ -828,16 +826,32 @@
 
     if (groundSvgEl) {
       const groundRect = groundSvgEl.getBoundingClientRect();
-      // Çimin görsel üst kenarı (path'lerin başladığı yer) tam SVG kutusunun
-      // üstü değil, biraz aşağısında (path "M 0,80 ..." ~%57 civarı) — bu
-      // yüzden SVG yüksekliğinin ~%45'i kadar bir payla üst kenara yaklaşılır.
-      const grassTopY = groundRect.top + groundRect.height * 0.45;
+      // SVG viewBox="0 0 1200 140" — ön çim path'inin en üst noktası (Q kontrol
+      // noktası y≈35) gerçek path üzerinde ~y=50 civarına denk gelir, yani
+      // viewBox'ın ~%36'sı. Ama yaprakların optik olarak çimin üstüne oturması
+      // için çim tepesinin biraz daha yukarısını hedefliyoruz (%22).
+      const grassTopY = groundRect.top + groundRect.height * 0.22;
       groundOffsetFromBottom = Math.max(10, rect.bottom - grassTopY);
     }
   }
 
   window.addEventListener("resize", resizePetalCanvas);
-  setTimeout(resizePetalCanvas, 50);
+  // Mobilde orientation değişiminde layout tamamen değişir
+  window.addEventListener("orientationchange", () => {
+    setTimeout(resizePetalCanvas, 150);
+  });
+  // İlk ölçümü DOM tamamen render olduktan sonra yap (fontlar, SVG layout vb.)
+  setTimeout(resizePetalCanvas, 200);
+  // Güvenlik ağı: layout kaymasını yakala (font yükleme, lazy content vb.)
+  setTimeout(resizePetalCanvas, 800);
+  // ResizeObserver ile stage veya ground-terrain boyut değişimlerini yakala
+  if (typeof ResizeObserver !== "undefined" && canvas.parentElement) {
+    const ro = new ResizeObserver(() => resizePetalCanvas());
+    ro.observe(canvas.parentElement);
+    if (groundSvgEl && groundSvgEl.parentElement) {
+      ro.observe(groundSvgEl.parentElement);
+    }
+  }
 
   const activePetals = [];
   const groundPetals = [];
@@ -925,8 +939,12 @@
     if (!canvasW || !canvasH) return canvasH - groundOffsetFromBottom;
     // Normalized x from center (-1 at left edge, 0 at center, +1 at right edge)
     const nx = Math.max(-1, Math.min(1, (x - canvasW / 2) / (canvasW / 2)));
-    // Parabolic mound shape: merkeze doğru biraz daha yüksek
-    const hillElevation = Math.max(0, 1 - nx * nx) * 38;
+    // Hafif parabolic kavis: ground SVG path zaten organik tepe şeklinde,
+    // buradaki hillElevation yalnızca yaprakların tam düz bir çizgiye değil
+    // hafif doğal bir eğriye oturması için. Mobilde (dar ekran) daha küçük.
+    const isMobile = canvasW < 640;
+    const hillPeak = isMobile ? 8 : 14;
+    const hillElevation = Math.max(0, 1 - nx * nx) * hillPeak;
     return canvasH - groundOffsetFromBottom - hillElevation;
   }
 
