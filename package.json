@@ -5,7 +5,7 @@
   "main": "server/server.js",
   "author": "dixtuel",
   "license": "MIT",
-  "homepage": "https://dxtl.com.tr",
+  "homepage": "https://dixtuel.tr",
   "scripts": {
     "start": "node server/server.js"
   },

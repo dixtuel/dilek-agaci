@@ -1,8 +1,8 @@
 # Dilek Ağacı
 
-[![Website](https://img.shields.io/badge/website-dilekagaci.dxtl.com.tr-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://dilekagaci.dxtl.com.tr)
+[![Website](https://img.shields.io/badge/website-dilekagaci.sely.tr-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://dilekagaci.sely.tr)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![Runtime](https://img.shields.io/badge/runtime-Cloudflare%20Pages%20%7C%20Node.js-black?style=flat-square)](https://dilekagaci.dxtl.com.tr)
+[![Runtime](https://img.shields.io/badge/runtime-Cloudflare%20Pages%20%7C%20Node.js-black?style=flat-square)](https://dilekagaci.sely.tr)
 [![Database](https://img.shields.io/badge/database-Turso%20(libSQL)-00E599?style=flat-square&logo=sqlite&logoColor=white)](https://turso.tech)
 
 Bırakılan her dilekle birlikte yeni çiçeklerin açtığı ve dalların gökyüzüne uzandığı açık kaynaklı ortak dijital dilek ağacı platformu.
@@ -113,7 +113,7 @@ Node.js ortamını destekleyen herhangi bir PaaS servisinde veya bağımsız Lin
 | `NIM_MODEL` | Hayır | Moderasyon modeli (`nvidia/llama-3.1-nemotron-safety-guard-8b-v3`) |
 | `HCAPTCHA_SITE_KEY` | Evet | hCaptcha genel site anahtarı (public) |
 | `HCAPTCHA_SECRET` | Evet | hCaptcha gizli doğrulama anahtarı (secret) |
-| `CORS_ALLOWED_ORIGINS`| Hayır | İzin verilen alan adları (`https://dilekagaci.dxtl.com.tr`) |
+| `CORS_ALLOWED_ORIGINS`| Hayır | İzin verilen alan adları (`https://dilekagaci.sely.tr`) |
 | `PORT` | Hayır | Node.js sunucu portu (varsayılan: `3020`) |
 
 ---
