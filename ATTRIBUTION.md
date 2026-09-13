@@ -48,7 +48,17 @@ Bu belge, **Dilek Ağacı** projesinde doğrudan veya dolaylı olarak kullanıla
 
 ---
 
-## 3. Tipografi ve Yazı Tipleri (Google Fonts)
+## 3. Veri Setleri ve Moderasyon Sözlükleri
+
+### [ooguz/turkce-kufur-karaliste](https://github.com/ooguz/turkce-kufur-karaliste)
+- **Kullanım:** İki katmanlı içerik denetiminde anında yerel ret sağlayan Türkçe küfür ve argo kara listesi (`server/wordlist.js`, `functions/api/wishes.js`). İkinci katmanda NVIDIA NIM `llama-3.1-nemotron-safety-guard-8b-v3` çalışır.
+- **Lisans:** Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+- **Telif Hakkı:** Copyright (c) Oğuz (ooguz)
+- **Web Sitesi:** https://github.com/ooguz/turkce-kufur-karaliste
+
+---
+
+## 4. Tipografi ve Yazı Tipleri (Google Fonts)
 
 ### [Italianno](https://fonts.google.com/specimen/Italianno)
 - **Kullanım:** Logo kaligrafisi ve imza tipografisi.
@@ -62,7 +72,7 @@ Bu belge, **Dilek Ağacı** projesinde doğrudan veya dolaylı olarak kullanıla
 
 ---
 
-## 4. Matematiksel & Grafiksel Algoritmalar
+## 5. Matematiksel & Grafiksel Algoritmalar
 
 ### Kübik Bézier Fraktal Kanopi Motoru
 - **Kullanım:** SVG tabanlı dallanma ve ağaç kanopisinin dinamik hesaplanması (`public/tree.js`).
@@ -78,6 +88,6 @@ Bu belge, **Dilek Ağacı** projesinde doğrudan veya dolaylı olarak kullanıla
 
 ---
 
-## 5. Lisans Bildirimi
+## 6. Lisans Bildirimi
 
 Yukarıda listelenen bileşenlerin kendi lisans koşulları saklı kalmak kaydıyla, Dilek Ağacı kaynak kodunun tamamı **[MIT Lisansı](LICENSE)** ile lisanslanmıştır.
