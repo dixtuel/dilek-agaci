@@ -1172,3 +1172,26 @@ textarea:focus {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Scraper & Bot Anti-Harvesting Styles */
+.protected-contact-link {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: inherit;
+  transition: opacity 0.15s ease;
+}
+.protected-contact-link:hover {
+  opacity: 0.8;
+}
+.protected-contact-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.bot-decoy {
+  display: none !important;
+  speak: never;
+}
