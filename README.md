@@ -9,6 +9,8 @@ Bırakılan her dilekle birlikte yeni çiçeklerin açtığı ve dalların göky
 
 Sistem, hem **Cloudflare Pages / Functions (Edge / Serverless)** ortamında 0 ms cold start ile global CDN üzerinden, hem de standart **Node.js / Express (Docker, VPS, Render)** ortamında tam uyumlu olarak çalışacak hibrit bir mimariye sahiptir.
 
+[Canlı Demo](https://dilekagaci.sely.tr) • [Özellikler](#özellikler) • [Mimari](#mimari-ve-teknoloji-yığını) • [Kurulum](#kurulum-ve-yerel-geliştirme) • [Dağıtım](#dağıtım-deployment) • [Ortam Değişkenleri](#ortam-değişkenleri) • [Atıflar](#açık-kaynak-atıfları)
+
 ---
 
 ## Özellikler
@@ -20,14 +22,30 @@ Sistem, hem **Cloudflare Pages / Functions (Edge / Serverless)** ortamında 0 ms
   - **Cloudflare Pages + Functions:** Statik önyüz sınırsız Cloudflare CDN'den sunulurken, `/api/wishes` rotası Edge Functions üzerinde bağımsız çalışır.
   - **Node.js + Express:** `server/server.js` üzerinden klasik sunucu veya konteyner ortamında çalıştırılabilir.
 - **İki Katmanlı İçerik Moderasyonu:**
-  - Yerel Türkçe kelime kara listesi ile hızlı ön eleme.
-  - NVIDIA NIM (`llama-3.1-nemotron-safety-guard-8b-v3`) 23 kategorilik içerik güvenliği modeli.
+  - Yerel Türkçe kelime kara listesi ile hızlı ön eleme (`server/wordlist.js`).
+  - NVIDIA NIM (`llama-3.1-nemotron-safety-guard-8b-v3`) 23 kategorilik içerik güvenliği modeli (fail-closed).
   - hCaptcha entegrasyonu ile bot ve spam engelleme.
-- **Turso libSQL & Şeffaf Sıkıştırma:** Veriler bulut SQLite altyapısında saklanır; Web Streams Deflate ve zlib ile metinler şeffaf olarak sıkıştırılır.
+- **Turso libSQL & Şeffaf Sıkıştırma:** Veriler bulut SQLite altyapısında saklanır; Web Streams Deflate ve zlib ile metinler şeffaf olarak sıkıştırılır (`z64:` prefix'i).
+- **Çift Dilli Akıllı Arayüz:** Türkçe (`/`) ve İngilizce (`/en/`) rotaları, `localStorage` dil hafızası ve WCAG 2.1 AA erişilebilirlik uyumu.
 
 ---
 
 ## Mimari ve Teknoloji Yığını
+
+```mermaid
+graph TD
+    User([Kullanıcı / Tarayıcı]) -->|İstek| CDN[Cloudflare Pages CDN<br/>dilekagaci.sely.tr]
+    CDN -->|Statik SVG Ağaç + Canvas| UI[HTML5 Canvas + Kübik Bézier Fraktal Kanopi]
+    CDN -->|/api/wishes| Edge[Cloudflare Pages Functions<br/>functions/api/wishes.js]
+    Edge -->|Zlib / Web Streams Deflate| Compress[Şeffaf Sıkıştırma Motoru]
+    Edge -->|İki Kademeli Moderasyon| Mod[Yerel Filtre + NVIDIA NIM Safety Guard]
+    Edge -->|Bot Doğrulama| Bot[hCaptcha Siteverify]
+    Edge -->|Kalıcı Veri| DB[(Turso Bulut libSQL / SQLite)]
+
+    subgraph "Alternatif Konteyner / VPS Runtime"
+        NodeServer[Node.js / Express<br/>server/server.js] --> DB
+    end
+```
 
 | Katman | Teknoloji / Servis | Açıklama |
 | :--- | :--- | :--- |
@@ -115,6 +133,12 @@ Node.js ortamını destekleyen herhangi bir PaaS servisinde veya bağımsız Lin
 | `HCAPTCHA_SECRET` | Evet | hCaptcha gizli doğrulama anahtarı (secret) |
 | `CORS_ALLOWED_ORIGINS`| Hayır | İzin verilen alan adları (`https://dilekagaci.sely.tr`) |
 | `PORT` | Hayır | Node.js sunucu portu (varsayılan: `3020`) |
+
+---
+
+## Açık Kaynak Atıfları
+
+Bu projede kullanılan harici açık kaynak kütüphaneler, yazı tipleri, simgeler ve tasarım referansları hakkında ayrıntılı bilgi için [ATTRIBUTION.md](ATTRIBUTION.md) dosyasını inceleyebilirsiniz.
 
 ---
 
