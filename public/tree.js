@@ -879,10 +879,10 @@
 
   const activePetals = [];
   const groundPetals = [];
-  let maxGroundPetals = isLowMode ? 6 : 18;
-  let maxActivePetals = isLowMode ? 3 : 8;
-  let spawnInterval = isLowMode ? 1400 : 600;
-  let targetFrameInterval = isLowMode ? (1000 / 30) : 0;
+  maxGroundPetals = isLowMode ? 6 : 18;
+  maxActivePetals = isLowMode ? 3 : 8;
+  spawnInterval = isLowMode ? 1400 : 600;
+  targetFrameInterval = isLowMode ? (1000 / 30) : 0;
   let lastFrameTime = 0;
   let petalAnimationId = null;
   let lastSpawnTime = 0;
