@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Terms &amp; Privacy — Wish Tree</title>
-  <meta name="description" content="Community guidelines and privacy policy for the shared digital Wish Tree platform." />
+  <meta name="description" content="Community guidelines, data transparency, and privacy policy for the shared digital Wish Tree platform." />
   <meta name="theme-color" content="#4A4E74" />
   <meta name="color-scheme" content="dark" />
-  <meta name="robots" content="noindex, follow" />
-  <link rel="canonical" href="https://dilekagaci.sely.tr/terms.html" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://dilekagaci.sely.tr/en/terms.html" />
   <link rel="alternate" hreflang="tr" href="https://dilekagaci.sely.tr/terms.html" />
   <link rel="alternate" hreflang="en" href="https://dilekagaci.sely.tr/en/terms.html" />
   <link rel="alternate" hreflang="x-default" href="https://dilekagaci.sely.tr/terms.html" />
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Italianno&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../style.css?v=20260823.17" />
+  <link rel="stylesheet" href="../style.css?v=20260920.01" />
   <script src="/identity-guard.js" defer></script>
 </head>
 <body>
@@ -52,25 +52,67 @@
   </header>
 
   <main class="terms">
-    <h1>Terms &amp; Privacy</h1>
-    <p>Wish Tree is a shared digital public board where anyone can hang a wish, watch a cherry blossom bloom, and share positivity with visitors worldwide.</p>
+    <span class="terms-badge">Transparency &amp; Privacy Notice</span>
+    <h1>Terms of Service &amp; Privacy Policy</h1>
+    <p>Wish Tree is an open, account-free shared digital board where anyone can hang a warm wish, watch a sakura flower bloom, and share positivity. This document explains what happens to your data, what we never collect, and how your privacy rights are protected, without confusing legalese or developer jargon.</p>
 
-    <h2>1. Privacy &amp; Data Collection</h2>
-    <p>We believe in absolute simplicity and privacy. We do not use tracking cookies, analytics pixels, or user accounts. When you hang a wish, only the text you write, an optional nickname, and the creation timestamp are stored in our secure database.</p>
+    <h2>1. What We Collect (Data Minimization)</h2>
+    <p>We believe in collecting only the bare minimum required to display your wish:</p>
+    <ul>
+      <li><strong>Wish Text:</strong> The message you hang on the branch (up to 180 characters). Stored in a compressed format (zlib Deflate) on the server to keep page loads fast.</li>
+      <li><strong>Nickname / Name:</strong> An optional name you choose to display (up to 24 characters). Left blank, you will simply appear as anonymous.</li>
+      <li><strong>Timestamp:</strong> The date and time when the blossom blooms.</li>
+    </ul>
 
-    <h2>2. Community Guidelines &amp; Moderation</h2>
-    <p>Because all wishes are publicly visible to everyone on the tree, wishes pass through automated content safety filtering (local filters and NVIDIA NIM AI guardrails) before appearing on the tree. Hate speech, harassment, profanity, spam, and harmful content are automatically rejected.</p>
+    <h2>2. What We Never Collect</h2>
+    <p>Your privacy is respected by design:</p>
+    <ul>
+      <li><strong>No Accounts or Passwords:</strong> There is no user registration, login system, or password database.</li>
+      <li><strong>No Email or Phone:</strong> We do not ask for personal contact information; we do not build marketing or newsletter lists.</li>
+      <li><strong>No Stored IP Addresses:</strong> Your IP address is never stored in the database or tied to your wish. It is evaluated only momentarily at the Cloudflare edge for spam protection and rate limiting.</li>
+      <li><strong>No Tracking Pixels:</strong> We do not use Google Analytics, advertising pixels, or third-party behavioral trackers.</li>
+    </ul>
 
-    <h2>3. Spam Prevention</h2>
-    <p>We use hCaptcha solely to verify that wish submissions are made by human visitors, protecting the tree from spam bots.</p>
+    <h2>3. Public Board Notice</h2>
+    <p>Every wish hung on the tree is publicly visible to all visitors. For your own safety and the safety of others, please <strong>never share sensitive personal data</strong> (such as national ID numbers, phone numbers, home addresses, confidential secrets, or financial details) in your wishes.</p>
 
-    <h2>4. Open Source &amp; License</h2>
-    <p>This project is open source under the MIT License. Created with love by <a href="https://dixtuel.tr" target="_blank" rel="noopener">dixtuel</a>.</p>
+    <h2>4. Automated Content Moderation &amp; AI Safety Guard</h2>
+    <p>To keep the tree positive, welcoming, and safe for everyone, all wishes undergo a two-tier automated check before appearing:</p>
+    <ul>
+      <li><strong>Local Wordlist Filter:</strong> Blocks known profane, offensive, or illicit words, as well as obvious PII patterns.</li>
+      <li><strong>NVIDIA NIM Safety Model:</strong> The submitted text is analyzed over an encrypted TLS connection by NVIDIA NIM's safety guard model to detect hate speech, harassment, sexually explicit content, and violence. This evaluation is purely transient and your text is not used for AI model training.</li>
+    </ul>
+    <p>Wishes that violate community safety rules are rejected immediately and never published.</p>
 
-    <h2>5. Contact</h2>
-    <p>To report a wish or ask a question: <span class="protected-contact" data-domain="dixtuel" data-locale="en">[email protected]</span> (replace with your own contact address in your self-hosted deployment).</p>
+    <h2>5. Infrastructure &amp; Third Parties</h2>
+    <p>To ensure global reliability, performance, and security, we rely on trusted infrastructure providers:</p>
+    <ul>
+      <li><strong>Cloudflare Pages &amp; Edge:</strong> Web hosting, DDoS mitigation, and global CDN delivery.</li>
+      <li><strong>Turso (ChiselStrike libSQL):</strong> Encrypted edge database hosting wish texts and timestamps.</li>
+      <li><strong>hCaptcha (Intuition Machines, Inc.):</strong> Form protection to verify human interaction and prevent automated spam bots.</li>
+      <li><strong>Google Fonts:</strong> Web fonts for page typography.</li>
+    </ul>
 
-    <p style="margin-top: 36px;">
+    <h2>6. Cookies &amp; Local Storage</h2>
+    <p>We do not use tracking or profiling cookies:</p>
+    <ul>
+      <li><strong>Language Preference:</strong> Your chosen language (TR or EN) is stored solely in your browser's local storage (<code>localStorage</code>) and is never transmitted to our server.</li>
+      <li><strong>Consent State:</strong> Your consent preference (<code>dilek_pref</code>) is kept as a minimal, compact encrypted cookie on your device.</li>
+      <li><strong>Battery &amp; Low-Power Modes:</strong> Battery saving and data saving are detected dynamically in real time via browser hardware APIs. No hardware state is saved in cookies or sent to any server.</li>
+    </ul>
+
+    <h2>7. Your Rights &amp; Takedown Requests (KVKK &amp; GDPR)</h2>
+    <p>Under GDPR (Arts. 12–17) and the Turkish Personal Data Protection Law (KVKK Art. 11), you have the right to request information about your data and demand the deletion or correction of content associated with you.</p>
+    <p>If you wish to remove a message you posted or request the takedown of any content, simply contact the operator with the wish text and approximate posting time. Your request will be processed promptly and the entry will be permanently removed.</p>
+
+    <h2>8. Contact &amp; Data Controller</h2>
+    <p>For removal requests, technical questions, or general inquiries:</p>
+    <p><span class="protected-contact" data-domain="dixtuel" data-locale="en">[email protected]</span></p>
+
+    <h2>9. Open Source &amp; License</h2>
+    <p>Wish Tree is an open-source project released under the MIT License. Created and shared with the community with care.</p>
+
+    <p style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--ink-line);">
       <a href="/en">← Return to the Wish Tree</a> &nbsp;·&nbsp;
       <a href="/en/accessibility.html">Accessibility Statement</a>
     </p>

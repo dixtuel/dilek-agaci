@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Şartlar &amp; Gizlilik — Dilek Ağacı</title>
-  <meta name="description" content="Dilek Ağacı topluluk kuralları ve gizlilik politikası." />
+  <meta name="description" content="Dilek Ağacı topluluk ilkeleri, veri şeffaflığı ve KVKK / GDPR aydınlatma bildirimi." />
   <meta name="theme-color" content="#4A4E74" />
   <meta name="color-scheme" content="dark" />
   <meta name="robots" content="index, follow" />
@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Italianno&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20260823.17" />
+  <link rel="stylesheet" href="style.css?v=20260920.01" />
   <script src="/identity-guard.js" defer></script>
 </head>
 <body>
@@ -52,25 +52,67 @@
   </header>
 
   <main class="terms">
-    <h1>Şartlar &amp; Gizlilik</h1>
-    <p>Dilek Ağacı, hesap oluşturmadan kullanılan, herkese açık ortak bir dilek panosudur. Bu sayfa burada ne olup ne olmadığını basitçe anlatır.</p>
+    <span class="terms-badge">Şeffaflık &amp; KVKK Bildirimi</span>
+    <h1>Şartlar &amp; Gizlilik Politikası</h1>
+    <p>Dilek Ağacı; üyelik hesabı, şifre ya da e-posta gerektirmeyen, iyi niyetli dileklerin paylaşıldığı ortak ve dijital bir açık panodur. Bu sayfa, burada hangi verilerin ne amaçla işlendiğini, nelerin kesinlikle tutulmadığını ve haklarınızı karmaşık teknik jargonlara boğulmadan doğrudan ve dürüstçe açıklar.</p>
 
-    <h2>Ne saklıyoruz</h2>
-    <p>Yalnızca gönderdiğin dilek metnini ve (yazdıysan) isim/rumuzunu saklıyoruz. Hesap, şifre, e-posta ya da başka bir kişisel veri istemiyoruz. IP adresin yalnızca kötüye kullanım ve spam engelleme sırasında anlık olarak kontrol edilir, dilekle birlikte saklanmaz.</p>
+    <h2>1. Ne Topluyoruz? (Veri Minimizasyonu)</h2>
+    <p>Sitemizde yalnızca bir dilek astığınızda sunduğunuz asgari bilgiler işlenir:</p>
+    <ul>
+      <li><strong>Dilek Metniniz:</strong> Ağaca astığınız mesaj (en fazla 180 karakter). Ağacın yüklenmesini hızlandırmak için sunucuda sıkıştırılmış (zlib Deflate) formatta saklanır.</li>
+      <li><strong>İsim veya Rumuz:</strong> İsteğe bağlı olarak girdiğiniz takma ad (en fazla 24 karakter). Boş bırakırsanız anonim olarak kabul edilir.</li>
+      <li><strong>Tarih ve Saat:</strong> Çiçeğin açtığı anı belirten zaman damgası.</li>
+    </ul>
 
-    <h2>Moderasyon</h2>
-    <p>Her dilek, yayınlanmadan önce otomatik bir içerik denetiminden (yerel filtreler ve NVIDIA NIM yapay zekâ güvenlik modeli) geçer. Nefret söylemi, cinsel içerik, şiddet, taciz, spam veya kişisel veri içeren dilekler yayınlanmaz.</p>
+    <h2>2. Neleri Kesinlikle Toplamıyoruz?</h2>
+    <p>Kullanıcı gizliliğine saygı temel prensibimizdir:</p>
+    <ul>
+      <li><strong>Üyelik / Şifre Yok:</strong> Sitede hesap oluşturma veya giriş mekanizması bulunmaz; şifre veritabanı tutulmaz.</li>
+      <li><strong>E-posta / Telefon Yok:</strong> İletişim bilgisi talep edilmez, pazarlama veya bülten listesi oluşturulmaz.</li>
+      <li><strong>IP Adresi Kaydedilmez:</strong> IP adresiniz dileğinizle ilişkilendirilmez veya veritabanına asla yazılmaz. Sadece kötüye kullanımı ve spam saldırılarını engellemek amacıyla Cloudflare güvenlik katmanında anlık ve geçici olarak değerlendirilir.</li>
+      <li><strong>Takip Pikselleri Yok:</strong> Google Analytics, Meta Pixel veya üçüncü taraf reklam/profilleme araçları kullanılmaz.</li>
+    </ul>
 
-    <h2>Spam Koruması</h2>
-    <p>Dilek formunu spam botlarından korumak için hCaptcha doğrulaması kullanılmaktadır.</p>
+    <h2>3. Ortak ve Herkese Açık Alan Bildirimi</h2>
+    <p>Ağaca asılan tüm dilekler, siteyi ziyaret eden herkes tarafından görüntülenebilir. Bu nedenle lütfen dileklerinizde kendinize veya üçüncü kişilere ait <strong>T.C. kimlik numarası, telefon, ev adresi, özel hayatın gizliliğini ihlal eden sırlar veya mali bilgiler</strong> gibi hassas kişisel verileri asla paylaşmayınız.</p>
 
-    <h2>Açık Kaynak &amp; Lisans</h2>
-    <p>Bu proje MIT Lisansı altında açık kaynaklıdır. <a href="https://dixtuel.tr" target="_blank" rel="noopener">dixtuel</a> tarafından sevgiyle yapılmıştır.</p>
+    <h2>4. Otomatik İçerik Moderasyonu &amp; Yapay Zekâ Güvenlik Katmanı</h2>
+    <p>Ağacın güvenli, huzurlu ve yapıcı bir ortam olarak kalması için gönderilen her dilek iki aşamalı güvenlik süzgecinden geçer:</p>
+    <ul>
+      <li><strong>Yerel Filtre:</strong> Hakaret, küfür, yasa dışı ifadeler ve açık kişisel veri kalıpları kontrol edilir.</li>
+      <li><strong>NVIDIA NIM Güvenlik Modeli:</strong> Gönderilen metin, nefret söylemi, taciz, cinsel içerik ve şiddet unsurlarını filtrelemek amacıyla güvenli TLS bağlantısı üzerinden NVIDIA NIM güvenlik modeli (Llama Guard mimarisi) tarafından anlık olarak analiz edilir. Bu analiz yalnızca anlık güvenlik denetimi içindir; metniniz yapay zekâ eğitimi amacıyla saklanmaz.</li>
+    </ul>
+    <p>Kurallara aykırı bulunan dilekler sisteme kaydedilmez ve yayınlanmaz.</p>
 
-    <h2>İletişim</h2>
-    <p>Bir dilek hakkında bildirimde bulunmak veya soru sormak isterseniz: <span class="protected-contact" data-domain="dixtuel" data-locale="tr">[e-posta korumalı]</span>.</p>
+    <h2>5. Üçüncü Taraf Altyapı Sağlayıcıları</h2>
+    <p>Hizmetin sürekliliği ve güvenliği için aşağıdaki güvenilir sağlayıcılardan yararlanılmaktadır:</p>
+    <ul>
+      <li><strong>Cloudflare Pages &amp; Edge:</strong> Web sitesinin sunulması, DDoS engelleme ve küresel CDN dağıtımı.</li>
+      <li><strong>Turso (ChiselStrike libSQL):</strong> Dileklerin güvenli ve dağıtık olarak saklandığı şifreli veritabanı.</li>
+      <li><strong>hCaptcha (Intuition Machines, Inc.):</strong> Formu otomatik saldırı botlarından korumak için kullanılır. Tarayıcınızın bot olup olmadığını doğrular.</li>
+      <li><strong>Google Fonts:</strong> Tipografi ve yazı tipi dosyalarını sunar.</li>
+    </ul>
 
-    <p style="margin-top: 36px;">
+    <h2>6. Çerezler ve Tarayıcı Depolaması</h2>
+    <p>Sitemizde kullanıcıları takip eden veya profilleme yapan çerezler kesinlikle kullanılmaz:</p>
+    <ul>
+      <li><strong>Dil Tercihi:</strong> Seçtiğiniz dil (Türkçe / İngilizce), yalnızca tarayıcınızın kendi yerel hafızasında (<code>localStorage</code>) saklanır; sunucuya gönderilmez.</li>
+      <li><strong>Çerez Tercihi:</strong> Sitedeki onay durumunuz (<code>dilek_pref</code>), cihazınızda minimal ve şifreli bir çerez olarak tutulur.</li>
+      <li><strong>Düşük Güç ve Performans Modu:</strong> Cihazınızın pil tasarrufu veya veri tasarrufu durumu tarayıcınızın kendi donanım API'leri üzerinden anlık olarak algılanır. Cihaz durumunuz hiçbir yere kaydedilmez veya sunucuya iletilmez.</li>
+    </ul>
+
+    <h2>7. Haklarınız ve İçerik Kaldırma (KVKK m. 11 &amp; GDPR)</h2>
+    <p>6698 sayılı Kişisel Verilerin Korunması Kanunu'nun (KVKK) 11. maddesi ve Avrupa Genel Veri Koruma Tüzüğü (GDPR) kapsamında, kişisel verilerinizin işlenip işlenmediğini öğrenme, yanlış verilerin düzeltilmesini ve verilerinizin silinmesini talep etme hakkına sahipsiniz.</p>
+    <p>Ağaçta yer alan, yanlışlıkla eklediğiniz veya kaldırılmasını istediğiniz bir dilek bulunuyorsa; dilek metnini ve asıldığı yaklaşık tarihi belirterek doğrudan veri sorumlusuna başvurabilirsiniz. Talebiniz en kısa sürede incelenerek ilgili dilek kalıcı olarak sistemden silinir.</p>
+
+    <h2>8. İletişim ve Veri Sorumlusu</h2>
+    <p>Dilek kaldırma talepleri, teknik geri bildirimler veya sorularınız için veri sorumlusuna ulaşabilirsiniz:</p>
+    <p><span class="protected-contact" data-domain="dixtuel" data-locale="tr">[e-posta korumalı]</span></p>
+
+    <h2>9. Açık Kaynak ve Lisans</h2>
+    <p>Dilek Ağacı, MIT Lisansı altında açık kaynak olarak geliştirilmiştir. Topluluğa şeffaflık ve sevgiyle sunulmuştur.</p>
+
+    <p style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--ink-line);">
       <a href="/">← Ağaca Geri Dön</a> &nbsp;·&nbsp;
       <a href="/accessibility.html">Erişilebilirlik Bildirimi</a>
     </p>
