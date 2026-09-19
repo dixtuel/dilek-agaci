@@ -30,7 +30,13 @@ router.get("/", async (req, res, next) => {
     // Dynamic cache header for API polling
     res.setHeader("Cache-Control", "no-cache, private");
 
-    const [wishes, total] = await Promise.all([listSince(since, limit), totalWishes()]);
+    const wishes = await listSince(since, limit);
+    let total;
+    if (since > 0 && wishes.length === 0) {
+      total = since;
+    } else {
+      total = await totalWishes();
+    }
     res.json({ wishes, total });
   } catch (err) {
     next(err);

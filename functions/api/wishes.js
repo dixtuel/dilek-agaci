@@ -67,28 +67,24 @@ async function decompressText(stored) {
 }
 
 /**
- * Turso (libSQL) HTTP Pipeline Client (Zero-dependency, high-speed Edge fetch)
+ * Turso (libSQL) HTTP Pipeline Batch Client (Zero-dependency, high-speed multi-statement Edge fetch)
  */
-async function tursoQuery(env, sql, args = []) {
+async function tursoBatch(env, statements) {
   const dbUrl = env.TURSO_DATABASE_URL.replace(/^libsql:\/\//, "https://");
   const authToken = env.TURSO_AUTH_TOKEN;
 
-  const body = {
-    requests: [
-      {
-        type: "execute",
-        stmt: {
-          sql,
-          args: args.map((arg) => {
-            if (arg === null || arg === undefined) return { type: "null" };
-            if (typeof arg === "number") return { type: "integer", value: String(arg) };
-            return { type: "text", value: String(arg) };
-          }),
-        },
-      },
-      { type: "close" },
-    ],
-  };
+  const requests = statements.map(({ sql, args = [] }) => ({
+    type: "execute",
+    stmt: {
+      sql,
+      args: args.map((arg) => {
+        if (arg === null || arg === undefined) return { type: "null" };
+        if (typeof arg === "number") return { type: "integer", value: String(arg) };
+        return { type: "text", value: String(arg) };
+      }),
+    },
+  }));
+  requests.push({ type: "close" });
 
   const res = await fetch(`${dbUrl}/v2/pipeline`, {
     method: "POST",
@@ -96,7 +92,7 @@ async function tursoQuery(env, sql, args = []) {
       Authorization: `Bearer ${authToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ requests }),
   });
 
   if (!res.ok) {
@@ -105,24 +101,28 @@ async function tursoQuery(env, sql, args = []) {
   }
 
   const data = await res.json();
-  const execResult = data.results?.[0];
-  if (execResult?.type === "error") {
-    throw new Error(`Turso query error: ${execResult.error.message}`);
-  }
-
-  const response = execResult?.response?.result;
-  if (!response) return { rows: [], affected_row_count: 0 };
-
-  const cols = response.cols.map((c) => c.name);
-  const rows = (response.rows || []).map((row) => {
-    const obj = {};
-    row.forEach((val, idx) => {
-      obj[cols[idx]] = val.value;
+  return statements.map((_, i) => {
+    const execResult = data.results?.[i];
+    if (execResult?.type === "error") {
+      throw new Error(`Turso query error: ${execResult.error.message}`);
+    }
+    const response = execResult?.response?.result;
+    if (!response) return { rows: [], affected_row_count: 0 };
+    const cols = response.cols.map((c) => c.name);
+    const rows = (response.rows || []).map((row) => {
+      const obj = {};
+      row.forEach((val, idx) => {
+        obj[cols[idx]] = val.value;
+      });
+      return obj;
     });
-    return obj;
+    return { rows, affected_row_count: response.affected_row_count || 0 };
   });
+}
 
-  return { rows, affected_row_count: response.affected_row_count || 0 };
+async function tursoQuery(env, sql, args = []) {
+  const results = await tursoBatch(env, [{ sql, args }]);
+  return results[0];
 }
 
 let tableInitialized = false;
@@ -281,12 +281,39 @@ export async function onRequestGet(context) {
   const limit = Math.min(Number.parseInt(url.searchParams.get("limit") || "200", 10) || 200, 500);
 
   try {
-    await ensureTable(env);
-    const queryResult = await tursoQuery(
-      env,
-      "SELECT id, name, text, created_at FROM wishes WHERE id > ? ORDER BY id ASC LIMIT ?",
-      [since, limit]
-    );
+    let queryResult;
+    let total = 0;
+
+    if (since === 0) {
+      // First load: single batched HTTP request for wishes and total count (1 HTTP call, 0 cold DDL)
+      const results = await tursoBatch(env, [
+        {
+          sql: "SELECT id, name, text, created_at FROM wishes WHERE id > ? ORDER BY id ASC LIMIT ?",
+          args: [0, limit],
+        },
+        {
+          sql: "SELECT COUNT(*) AS total FROM wishes",
+          args: [],
+        },
+      ]);
+      queryResult = results[0];
+      total = Number(results[1].rows[0]?.total || 0);
+    } else {
+      // Polling request: fetch only newly appended wishes with id > since
+      queryResult = await tursoQuery(
+        env,
+        "SELECT id, name, text, created_at FROM wishes WHERE id > ? ORDER BY id ASC LIMIT ?",
+        [since, limit]
+      );
+      if (queryResult.rows.length === 0) {
+        // Idle poll: no new wishes arrived, avoid COUNT(*) full table scan row-read billing
+        total = since;
+      } else {
+        // New wishes found: execute count to ensure exact sync
+        const countResult = await tursoQuery(env, "SELECT COUNT(*) AS total FROM wishes");
+        total = Number(countResult.rows[0]?.total || 0);
+      }
+    }
 
     const wishes = await Promise.all(
       queryResult.rows.map(async (row) => ({
@@ -296,9 +323,6 @@ export async function onRequestGet(context) {
         created_at: row.created_at,
       }))
     );
-
-    const countResult = await tursoQuery(env, "SELECT COUNT(*) AS total FROM wishes");
-    const total = Number(countResult.rows[0]?.total || 0);
 
     // Initial page load uses short Edge CDN cache to absorb traffic spikes without consuming Function quotas
     const cacheHeader = since === 0
