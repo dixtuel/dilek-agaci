@@ -802,6 +802,21 @@
     }
   }
 
+  // --- Client Performance & Adaptive Engine Integration ---
+  const perfProfile = (typeof window !== "undefined" && window.ClientPerf)
+    ? window.ClientPerf.ClientProfiler.profile()
+    : { tier: "high", dprCap: 2, fpsTarget: 60 };
+  const savedDilekPref = (typeof window !== "undefined" && window.ClientPerf)
+    ? window.ClientPerf.ClientPref.load("dilek_pref")
+    : null;
+  let isLowMode = savedDilekPref && savedDilekPref.l !== undefined
+    ? savedDilekPref.l === 1
+    : (perfProfile.tier === "low");
+
+  if (typeof window !== "undefined" && window.ClientPerf) {
+    window.ClientPerf.ClientPref.applyLowModeClass(isLowMode);
+  }
+
   // --- Hardware-Accelerated Falling Sakura Petals & Grass Accumulation Engine ---
   const canvas = document.getElementById("petals-canvas");
   const ctx = canvas ? canvas.getContext("2d") : null;
@@ -817,7 +832,7 @@
   function resizePetalCanvas() {
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = isLowMode ? 1 : Math.min(window.devicePixelRatio || 1, 2);
     canvasW = rect.width;
     canvasH = rect.height;
     canvas.width = Math.round(canvasW * dpr);
@@ -855,7 +870,11 @@
 
   const activePetals = [];
   const groundPetals = [];
-  const MAX_GROUND_PETALS = 18;
+  let maxGroundPetals = isLowMode ? 6 : 18;
+  let maxActivePetals = isLowMode ? 3 : 8;
+  let spawnInterval = isLowMode ? 1400 : 600;
+  let targetFrameInterval = isLowMode ? (1000 / 30) : 0;
+  let lastFrameTime = 0;
   let petalAnimationId = null;
   let lastSpawnTime = 0;
 
@@ -961,17 +980,28 @@
     context.restore();
   }
 
-  function updatePetalsPhysics() {
+  function updatePetalsPhysics(timestamp) {
     if (!ctx || !canvasW || !canvasH) {
       petalAnimationId = requestAnimationFrame(updatePetalsPhysics);
       return;
     }
 
+    // 30 FPS capping for low-mode / old webviews to save battery and GPU cycles
+    if (isLowMode && timestamp && lastFrameTime) {
+      if (timestamp - lastFrameTime < targetFrameInterval) {
+        if (!document.hidden) {
+          petalAnimationId = requestAnimationFrame(updatePetalsPhysics);
+        }
+        return;
+      }
+    }
+    lastFrameTime = timestamp || Date.now();
+
     ctx.clearRect(0, 0, canvasW, canvasH);
 
     const now = Date.now();
-    // Steady natural spawn flow: every 550 - 750ms
-    if (now - lastSpawnTime > 600 && activePetals.length < 8 && !document.hidden) {
+    // Steady natural spawn flow: normal 600ms, low-mode 1400ms
+    if (now - lastSpawnTime > spawnInterval && activePetals.length < maxActivePetals && !document.hidden) {
       spawnSinglePetal();
       lastSpawnTime = now;
     }
@@ -1017,7 +1047,7 @@
         groundPetals.push(p);
         activePetals.splice(i, 1);
 
-        if (groundPetals.length > MAX_GROUND_PETALS) {
+        if (groundPetals.length > maxGroundPetals) {
           const oldest = groundPetals.shift();
           oldest.fading = true;
         }
@@ -1056,10 +1086,12 @@
     if (document.hidden) return;
     if (pollTimeoutId) clearTimeout(pollTimeoutId);
 
-    // Active user (interacted within 90s): poll every 25s
-    // Idle/passive user (away > 90s): relax polling to 50s
+    // Active user (interacted within 90s): poll every 25s (or 60s in low-mode)
+    // Idle/passive user (away > 90s): relax polling to 50s (or 120s in low-mode)
     const isIdle = Date.now() - lastUserActivity > 90000;
-    const delay = isIdle ? 50000 : 25000;
+    const delay = isLowMode
+      ? (isIdle ? 120000 : 60000)
+      : (isIdle ? 50000 : 25000);
 
     pollTimeoutId = setTimeout(async () => {
       if (!document.hidden) {
@@ -1216,6 +1248,37 @@
     }
   });
 
+  // --- Low Mode UI Toggle Controller ---
+  function updateLowModeBtnUI() {
+    const btn = document.getElementById("low-mode-toggle");
+    if (!btn) return;
+    if (isLowMode) {
+      btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
+    } else {
+      btn.classList.remove("active");
+      btn.setAttribute("aria-pressed", "false");
+    }
+  }
+
+  const lowModeBtn = document.getElementById("low-mode-toggle");
+  if (lowModeBtn) {
+    updateLowModeBtnUI();
+    lowModeBtn.addEventListener("click", () => {
+      isLowMode = !isLowMode;
+      maxGroundPetals = isLowMode ? 6 : 18;
+      maxActivePetals = isLowMode ? 3 : 8;
+      spawnInterval = isLowMode ? 1400 : 600;
+      targetFrameInterval = isLowMode ? (1000 / 30) : 0;
+      if (window.ClientPerf) {
+        window.ClientPerf.ClientPref.save("dilek_pref", { l: isLowMode ? 1 : 0, c: 1 });
+        window.ClientPerf.ClientPref.applyLowModeClass(isLowMode);
+      }
+      resizePetalCanvas();
+      updateLowModeBtnUI();
+    });
+  }
+
   // Expose TreeEngine debug hooks for testing and inspection
   window.__TreeEngine = {
     getPetalSpawnPoints,
@@ -1228,5 +1291,17 @@
     getSegments: () => SEGMENTS,
     getActivePetals: () => activePetals,
     spawnSinglePetal,
+    isLowMode: () => isLowMode,
+    toggleLowMode: () => {
+      if (lowModeBtn) lowModeBtn.click();
+      else {
+        isLowMode = !isLowMode;
+        if (window.ClientPerf) {
+          window.ClientPerf.ClientPref.save("dilek_pref", { l: isLowMode ? 1 : 0, c: 1 });
+          window.ClientPerf.ClientPref.applyLowModeClass(isLowMode);
+        }
+      }
+      return isLowMode;
+    }
   };
 })();

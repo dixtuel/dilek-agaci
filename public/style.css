@@ -1195,3 +1195,55 @@ textarea:focus {
   display: none !important;
   speak: never;
 }
+
+/* --- Adaptive Low-Power / Old WebView / Save-Data Mode --- */
+html.low-mode .stars-layer,
+html.low-mode .shooting-star,
+html.low-mode .cloud,
+html.low-mode .sky-particles {
+  animation: none !important;
+}
+html.low-mode .moon-halo {
+  filter: blur(12px) !important;
+  box-shadow: none !important;
+}
+html.low-mode .wish-card,
+html.low-mode .panel,
+html.low-mode .topbar {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.low-mode .wish-card {
+  background: rgba(26, 18, 42, 0.96) !important;
+}
+html.low-mode .panel {
+  background: rgba(22, 14, 38, 0.98) !important;
+}
+html.low-mode .topbar {
+  background: rgba(18, 12, 34, 0.95) !important;
+}
+.low-mode-toggle {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--ink-light);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+}
+.low-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+}
+.low-mode-toggle.active {
+  background: rgba(226, 74, 114, 0.18);
+  border-color: rgba(226, 74, 114, 0.5);
+  color: #ffb8ca;
+}
+
