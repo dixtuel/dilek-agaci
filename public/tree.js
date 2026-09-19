@@ -802,19 +802,28 @@
     }
   }
 
-  // --- Client Performance & Adaptive Engine Integration ---
-  const perfProfile = (typeof window !== "undefined" && window.ClientPerf)
-    ? window.ClientPerf.ClientProfiler.profile()
-    : { tier: "high", dprCap: 2, fpsTarget: 60 };
-  const savedDilekPref = (typeof window !== "undefined" && window.ClientPerf)
-    ? window.ClientPerf.ClientPref.load("dilek_pref")
-    : null;
-  let isLowMode = savedDilekPref && savedDilekPref.l !== undefined
-    ? savedDilekPref.l === 1
-    : (perfProfile.tier === "low");
+  // --- Client Performance: Dynamic Reactive Monitor ---
+  let isLowMode = false;
+  let dynamicDpr = Math.min(window.devicePixelRatio || 1, 2);
+  let maxGroundPetals = 18;
+  let maxActivePetals = 8;
+  let spawnInterval = 600;
+  let targetFrameInterval = 0;
 
-  if (typeof window !== "undefined" && window.ClientPerf) {
-    window.ClientPerf.ClientPref.applyLowModeClass(isLowMode);
+  function applyPerfState(state) {
+    if (!state) return;
+    isLowMode = state.isLowMode;
+    dynamicDpr = state.dprCap || 1;
+    maxGroundPetals = isLowMode ? 6 : 18;
+    maxActivePetals = isLowMode ? 3 : 8;
+    spawnInterval = isLowMode ? 1400 : 600;
+    targetFrameInterval = isLowMode ? (1000 / 30) : 0;
+    if (typeof resizePetalCanvas === "function") resizePetalCanvas();
+    if (typeof updateLowModeBtnUI === "function") updateLowModeBtnUI();
+  }
+
+  if (typeof window !== "undefined" && window.ClientPerf && window.ClientPerf.subscribe) {
+    window.ClientPerf.subscribe(applyPerfState);
   }
 
   // --- Hardware-Accelerated Falling Sakura Petals & Grass Accumulation Engine ---
@@ -832,7 +841,7 @@
   function resizePetalCanvas() {
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const dpr = isLowMode ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = dynamicDpr;
     canvasW = rect.width;
     canvasH = rect.height;
     canvas.width = Math.round(canvasW * dpr);
@@ -987,8 +996,12 @@
     }
 
     // 30 FPS capping for low-mode / old webviews to save battery and GPU cycles
-    if (isLowMode && timestamp && lastFrameTime) {
-      if (timestamp - lastFrameTime < targetFrameInterval) {
+    if (timestamp && lastFrameTime) {
+      var deltaMs = timestamp - lastFrameTime;
+      if (window.ClientPerf && window.ClientPerf.recordFrame) {
+        window.ClientPerf.recordFrame(deltaMs);
+      }
+      if (isLowMode && deltaMs < targetFrameInterval) {
         if (!document.hidden) {
           petalAnimationId = requestAnimationFrame(updatePetalsPhysics);
         }
@@ -1265,17 +1278,17 @@
   if (lowModeBtn) {
     updateLowModeBtnUI();
     lowModeBtn.addEventListener("click", () => {
-      isLowMode = !isLowMode;
-      maxGroundPetals = isLowMode ? 6 : 18;
-      maxActivePetals = isLowMode ? 3 : 8;
-      spawnInterval = isLowMode ? 1400 : 600;
-      targetFrameInterval = isLowMode ? (1000 / 30) : 0;
-      if (window.ClientPerf) {
-        window.ClientPerf.ClientPref.save("dilek_pref", { l: isLowMode ? 1 : 0, c: 1 });
-        window.ClientPerf.ClientPref.applyLowModeClass(isLowMode);
+      if (window.ClientPerf && window.ClientPerf.setOverride) {
+        window.ClientPerf.setOverride(isLowMode ? "force_high" : "force_low");
+      } else {
+        isLowMode = !isLowMode;
+        maxGroundPetals = isLowMode ? 6 : 18;
+        maxActivePetals = isLowMode ? 3 : 8;
+        spawnInterval = isLowMode ? 1400 : 600;
+        targetFrameInterval = isLowMode ? (1000 / 30) : 0;
+        resizePetalCanvas();
+        updateLowModeBtnUI();
       }
-      resizePetalCanvas();
-      updateLowModeBtnUI();
     });
   }
 
