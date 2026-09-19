@@ -1,0 +1,38 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/terms
+  X-Robots-Tag: noindex, follow
+/privacy
+  X-Robots-Tag: noindex, follow
+/accessibility
+  X-Robots-Tag: noindex, follow
+/en/terms
+  X-Robots-Tag: noindex, follow
+/en/privacy
+  X-Robots-Tag: noindex, follow
+/en/accessibility
+  X-Robots-Tag: noindex, follow
+
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/en/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.css
+  Cache-Control: public, max-age=14400, stale-while-revalidate=3600
+
+/*.js
+  Cache-Control: public, max-age=14400, stale-while-revalidate=3600
+
+/*.png
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+
+/*.svg
+  Cache-Control: public, max-age=604800, stale-while-revalidate=86400
