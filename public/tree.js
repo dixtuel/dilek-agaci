@@ -810,6 +810,13 @@
   let spawnInterval = 600;
   let targetFrameInterval = 0;
 
+  // --- Hardware-Accelerated Falling Sakura Petals & Grass Accumulation Engine ---
+  // canvas/ctx must exist before applyPerfState can be subscribed below, since
+  // ClientPerf.subscribe() invokes the callback synchronously on subscription.
+  const canvas = document.getElementById("petals-canvas");
+  const ctx = canvas ? canvas.getContext("2d") : null;
+  const groundSvgEl = document.querySelector(".ground-svg");
+
   function applyPerfState(state) {
     if (!state) return;
     isLowMode = state.isLowMode;
@@ -821,15 +828,6 @@
     if (typeof resizePetalCanvas === "function") resizePetalCanvas();
     if (typeof updateLowModeBtnUI === "function") updateLowModeBtnUI();
   }
-
-  if (typeof window !== "undefined" && window.ClientPerf && window.ClientPerf.subscribe) {
-    window.ClientPerf.subscribe(applyPerfState);
-  }
-
-  // --- Hardware-Accelerated Falling Sakura Petals & Grass Accumulation Engine ---
-  const canvas = document.getElementById("petals-canvas");
-  const ctx = canvas ? canvas.getContext("2d") : null;
-  const groundSvgEl = document.querySelector(".ground-svg");
 
   let canvasW = 0;
   let canvasH = 0;
@@ -857,6 +855,13 @@
       const grassTopY = groundRect.top + groundRect.height * 0.22;
       groundOffsetFromBottom = Math.max(10, rect.bottom - grassTopY);
     }
+  }
+
+  // Subscribed here (after canvas/canvasW/resizePetalCanvas are all initialized)
+  // because ClientPerf.subscribe() invokes applyPerfState synchronously, and
+  // applyPerfState -> resizePetalCanvas touches canvas/canvasW/groundOffsetFromBottom.
+  if (typeof window !== "undefined" && window.ClientPerf && window.ClientPerf.subscribe) {
+    window.ClientPerf.subscribe(applyPerfState);
   }
 
   window.addEventListener("resize", resizePetalCanvas);
