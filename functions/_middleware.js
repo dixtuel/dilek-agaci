@@ -22,7 +22,7 @@ export async function onRequest(context) {
       element(el) {
         el.append(
           `<script>window.__CF_BEACON_TOKEN__=${JSON.stringify(token)};</script>` +
-            `<script defer src="/consent-banner.js?v=2"></script>`,
+            `<script defer src="/consent-banner.js?v=3"></script>`,
           { html: true }
         );
       },
